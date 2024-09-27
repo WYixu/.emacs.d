@@ -28,6 +28,7 @@
 (set-fringe-mode 10)
 
 (set-face-attribute 'default nil :font "JetBrainsMonoNL Nerd Font Propo")
+(set-face-attribute 'variable-pitch nil :font "Noto Sans CJK SC")
 
 (column-number-mode)
 (global-display-line-numbers-mode t)
@@ -45,7 +46,7 @@
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (load-theme 'doom-one-light t)
+  (load-theme 'doom-oksolar-light t)
 
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
@@ -150,3 +151,21 @@
 (use-package magit
   :custom
   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
+
+(defun mine/org-mode-setup ()
+  (org-indent-mode)
+  (auto-fill-mode 1)
+  (display-line-numbers-mode 0)
+  ;;(visual-line-mode 1)
+  (setq evil-auto-intent nil))
+(use-package org
+  :hook (org-mode . mine/org-mode-setup)
+  :config
+  (setq org-ellipsis "..."))
+(defun mine/org-mode-visual-fill-setup ()
+  (setq visual-fill-column-width 80
+	visual-fill-column-center-text t)
+  (visual-fill-column-mode 1))
+(use-package visual-fill-column
+  :defer t
+  :hook (org-mode . mine/org-mode-visual-fill-setup))
