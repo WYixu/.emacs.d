@@ -27,6 +27,8 @@
 (tooltip-mode -1)
 (set-fringe-mode 10)
 
+(set-face-attribute 'default nil :font "JetBrainsMonoNL Nerd Font Propo")
+
 (column-number-mode)
 (global-display-line-numbers-mode t)
 (dolist (mode '(org-mode-hook
@@ -35,12 +37,8 @@
 		eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
-;; (use-package catppuccin-theme
-;;  :ensure t
-;;  :config
-;;  (load-theme 'catppuccin :no-confirm)
-;;  (setq catppuccin-flavor 'latte)
-;;  (catppuccin-reload))
+(keymap-global-set "<escape>" 'keyboard-escape-quit)
+
 (use-package doom-themes
   :ensure t
   :config
@@ -87,9 +85,16 @@
 (use-package ivy-rich
   :init (ivy-rich-mode 1))
 
+(use-package nerd-icons)
+
 (use-package doom-modeline
   :ensure t
   :init (doom-modeline-mode 1))
+  ;:config
+  ;(set-face-attribute 'mode-line nil
+		      ;:height 120)
+  ;(set-face-attribute 'mode-line-inactive nil
+		      ;:height 120))
 
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
@@ -109,16 +114,39 @@
   ([remap describe-command] . helpful-command)
   ([remap describe-variable] . counsel-describe-variable)
   ([remap describe-key] . helpful-key))
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   '(doom-themes helpful ivy-rich which-key rainbow-delimiters counsel org ivy doom-modeline catppuccin-theme)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+
+(use-package general
+  :config
+  (general-evil-setup t)
+  (general-create-definer mine/leader-keys
+    :keymaps '(normal insert visual emacs)
+    :prefix "SPC"
+    :global-prefix "C-SPC")
+  (mine/leader-keys
+    "t" '(:ignore t :which-key "toggles")
+    "tt" '(counsel-load-theme :which-key "choose-theme")))
+	       
+(use-package evil
+  :init
+  (setq evil-want-integration t)
+  (setq evil-want-keybinding nil)
+  (setq evil-want-C-u-scroll t)
+  (setq evil-want-C-i-jump nil)
+  ;:hook (evil-mode . evil-hook)
+  :config
+  (evil-mode))
+(use-package evil-collection
+  :after evil
+  :config
+  (evil-collection-init))
+
+(use-package projectile
+  :diminish projectile-mode
+  :config (projectile-mode)
+  :custom ((projectile-completion-system 'ivy))
+  :bind-keymap
+  ("C-c p" . projectile-command-map))
+  
+(use-package magit
+  :custom
+  (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
