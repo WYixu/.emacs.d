@@ -29,6 +29,12 @@
 
 (set-face-attribute 'default nil :font "JetBrainsMonoNL Nerd Font Propo")
 (set-face-attribute 'variable-pitch nil :font "Noto Sans CJK SC")
+(set-fontset-font t 'han "Noto Sans CJK SC")
+(set-fontset-font t 'kana "Noto Sans CJK JP")
+(set-fontset-font t 'cjk-misc "Noto Sans CJK JP")
+
+(setq spilt-width-threshold 0)
+(setq spilt-height-threshold nil)
 
 (column-number-mode)
 (global-display-line-numbers-mode t)
@@ -135,7 +141,10 @@
   (setq evil-want-C-i-jump nil)
   ;:hook (evil-mode . evil-hook)
   :config
-  (evil-mode))
+  (evil-mode)
+  :custom
+  (evil-respect-visual-line-mode 1)
+  (evil-undo-system 'undo-redo))
 (use-package evil-collection
   :after evil
   :config
@@ -160,12 +169,50 @@
   (setq evil-auto-intent nil))
 (use-package org
   :hook (org-mode . mine/org-mode-setup)
+  :custom
+  (org-ellipsis "...")
+  (org-agenda-files
+   '("~/Documents/Notes/"))
+  (org-agenda-start-with-log-mode t)
+  (org-log-done 'time)
+  (org-log-into-drawer t)
+  (org-refile-targets
+   '(("archive.org" :maxlevel . 1)))
+
+  (org-agenda-custom-commands
+   '(("d" "Dashboard" ;;Agenda Dashboard
+      ((agenda "" ((org-deadline-warning-days 7)))
+       (todo "TODO"
+	     ((org-agenda-overriding-header "All Tasks")))))))
+
+  (org-habit-graph-column 60)
   :config
-  (setq org-ellipsis "..."))
-(defun mine/org-mode-visual-fill-setup ()
+  (require 'org-habit)
+  (add-to-list 'org-modules 'org-habit)
+  (advice-add 'org-refile :after 'org-save-all-org-buffers)
+  (require 'org-tempo)
+  (add-to-list 'org-modules 'org-tempo)
+  (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((emacs-lisp . t)
+     (python . t))))
+
+(defun mine/visual-fill-setup ()
   (setq visual-fill-column-width 80
 	visual-fill-column-center-text t)
-  (visual-fill-column-mode 1))
+  (visual-fill-column-mode 1)
+  (visual-line-mode))
 (use-package visual-fill-column
   :defer t
-  :hook (org-mode . mine/org-mode-visual-fill-setup))
+  :hook ((org-mode latex-mode) . mine/visual-fill-setup))
+
+(use-package rime
+  :custom
+  (default-input-method "rime")
+  (rime-show-candidate 'posframe)
+  (rime-posframe-style 'vertical)
+  (rime-posframe-properties (list :internal-border-width 10
+				  :font "Noto Sans CJK SC Bold")))
+
+
