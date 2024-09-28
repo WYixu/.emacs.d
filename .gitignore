@@ -2,4 +2,11 @@
 auto-save-list/
 eln-cache/
 elpa/
+rime/
+transient/
 tutorial/
+bookmarks
+custom.el
+projectile-bookmarks.eld
+recentf
+
