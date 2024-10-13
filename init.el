@@ -16,7 +16,9 @@
   (set-fontset-font t 'han "Noto Sans CJK SC")
   (set-fontset-font t 'kana "Noto Sans CJK JP")
   (set-fontset-font t 'cjk-misc "Noto Sans CJK JP"))
-(add-hook 'server-after-make-frame-hook #'mine/font-settings)
+
+(add-hook 'server-after-make-frame-hook #'mine/font-settings) ;; For client mode
+(mine/font-settings) ;; For GUI mode
 
 (setq split-width-threshold 0)
 (setq split-height-threshold nil)
@@ -39,6 +41,15 @@
   (package-install 'use-package))
 (require 'use-package)
 (setq use-package-always-ensure t)
+
+(use-package auto-package-update
+  :custom
+  (auto-package-update-interval 7)
+  (auto-package-update-prompt-before-update t)
+  (auto-package-update-hide-results nil)
+  :config
+  (auto-package-update-maybe)
+  (auto-package-update-at-time "09:00"))
 
 (defvar --backup-directory (concat user-emacs-directory "backups"))
 (if (not (file-exists-p --backup-directory))
@@ -200,7 +211,7 @@
   :ensure t
   :init
   (global-flycheck-mode)
-  (flymake-mode nil)
+  (flymake-mode -1)
   :custom
   (lsp-diagnostics-provider :flycheck))
 
@@ -281,8 +292,8 @@
      (shell . t))))
 
 (defun mine/org-babel-tangle-config ()
-  (when (file-equal-p (buffer-file-name)
-		      (expand-file-name "~/.emacs.d/init.org"))
+  (when (file-equal-p (file-name-directory (buffer-file-name))
+		      (expand-file-name "~/.emacs.d"))
     (let ((org-confirm-babel-evaluate nil))
       (org-babel-tangle))))
 

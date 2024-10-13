@@ -43,7 +43,9 @@ For CJK fonts, I use Noto Sans.
     (set-fontset-font t 'han "Noto Sans CJK SC")
     (set-fontset-font t 'kana "Noto Sans CJK JP")
     (set-fontset-font t 'cjk-misc "Noto Sans CJK JP"))
-  (add-hook 'server-after-make-frame-hook #'mine/font-settings)
+
+  (add-hook 'server-after-make-frame-hook #'mine/font-settings) ;; For client mode
+  (mine/font-settings) ;; For GUI mode
 #+end_src
 
 ** Split Settings
@@ -84,6 +86,19 @@ Use =use-package= for package management.
     (package-install 'use-package))
   (require 'use-package)
   (setq use-package-always-ensure t)
+#+end_src
+
+** Auto update
+
+#+begin_src emacs-lisp
+(use-package auto-package-update
+  :custom
+  (auto-package-update-interval 7)
+  (auto-package-update-prompt-before-update t)
+  (auto-package-update-hide-results nil)
+  :config
+  (auto-package-update-maybe)
+  (auto-package-update-at-time "09:00"))
 #+end_src
 
 * Backup setting
@@ -368,7 +383,7 @@ Use flycheck to handle diagnostics.
     :ensure t
     :init
     (global-flycheck-mode)
-    (flymake-mode nil)
+    (flymake-mode -1)
     :custom
     (lsp-diagnostics-provider :flycheck))
 #+end_src
@@ -486,8 +501,8 @@ Config org-babel-tangle to auto export this file to =init.el=.
 
 #+begin_src emacs-lisp
   (defun mine/org-babel-tangle-config ()
-    (when (file-equal-p (buffer-file-name)
-  		      (expand-file-name "~/.emacs.d/init.org"))
+    (when (file-equal-p (file-name-directory (buffer-file-name))
+  		      (expand-file-name "~/.emacs.d"))
       (let ((org-confirm-babel-evaluate nil))
         (org-babel-tangle))))
 
@@ -594,3 +609,4 @@ Use rime for Chinese input.
     (rime-posframe-properties (list :internal-border-width 10
   				  :font "Noto Sans CJK SC Bold")))
 #+end_src
+
