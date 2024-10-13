@@ -192,9 +192,10 @@ Org-mode hook
 #+begin_src emacs-lisp
   (defun mine/org-mode-setup ()
     (org-indent-mode)
-    (auto-fill-mode 1)
+    (auto-fill-mode 0)
     (display-line-numbers-mode 0)
-    (setq evil-auto-intent nil))
+    (setq evil-auto-intent nil)
+    (setq word-wrap-by-category t))
 #+end_src
 Main org-mode config.
 #+begin_src emacs-lisp
@@ -220,6 +221,12 @@ Main org-mode config.
          (todo "TODO"
   	     ((org-agenda-overriding-header "All Tasks")))))))
 
+    ;; =============
+    ;; === Latex ===
+    ;; =============
+    (org-preview-latex-default-process 'dvisvgm)
+    (org-format-latex-options '(:scale 0.4))
+
     :config
     (advice-add 'org-refile :after 'org-save-all-org-buffers)
 
@@ -236,7 +243,7 @@ Main org-mode config.
     (require 'org-tempo)
     (add-to-list 'org-modules 'org-tempo)
     (add-to-list 'org-structure-template-alist
-  		 '("el" . "src emacs-lisp"))
+  	       '("el" . "src emacs-lisp"))
 
     ;; =============
     ;; === Babel ===
@@ -244,24 +251,73 @@ Main org-mode config.
     (org-babel-do-load-languages
      'org-babel-load-languages
      '((emacs-lisp . t)
-       (python . t))))
+       (python . t)
+       (shell . t))))
 #+end_src
+
 ** Auto tangle config
 #+begin_src emacs-lisp
   (defun mine/org-babel-tangle-config ()
     (when (file-equal-p (buffer-file-name)
   		      (expand-file-name "~/.emacs.d/init.org"))
-    (let ((org-confirm-babel-evaluate nil))
-      (org-babel-tangle))))
+      (let ((org-confirm-babel-evaluate nil))
+        (org-babel-tangle))))
 
   (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'mine/org-babel-tangle-config)))
+#+end_src
+* Ledger-mode
+** Main
+#+begin_src emacs-lisp
+  (use-package ledger-mode
+    :init
+    (setq ledger-clear-whole-transactions 1)
+    :config
+    (add-to-list 'evil-emacs-state-modes 'ledger-report-mode)
+    :mode "\\.ledger\\'")
+#+end_src
+* Command Line
+** Term-mode
+#+begin_src emacs-lisp
+  (use-package term
+    :config
+    (setq explicit-shell-file-name "fish")
+    (setq term-prompt-regexp "^❯ *"))
+#+end_src
+** VTerm
+#+begin_src emacs-lisp
+  (use-package vterm
+    :commands vterm
+    :config
+    (setq vterm-shell "/bin/fish")
+    (setq term-prompt-regexp "^❯ *")
+    (setq vterm-max-scrollback 10000))
+#+end_src
+* File Management
+** Dired
+#+begin_src emacs-lisp
+  (use-package dired
+    :ensure nil
+    :commands (dired dired-jump)
+    :bind (("C-x C-j" . dired-jump))
+    :custom 
+    (dired-kill-when-opening-new-dired-buffer t)
+    (dired-listing-switches "-agho --group-directories-first")
+    :config
+    (evil-collection-define-key 'normal 'dired-mode-map
+      "h" 'dired-up-directory
+      "l" 'dired-find-file))
+#+end_src
+*** Icons
+#+begin_src emacs-lisp
+  (use-package nerd-icons-dired
+    :hook (dired-mode . nerd-icons-dired-mode))
 #+end_src
 * Visual
 ** Modeline
 #+begin_src emacs-lisp
-(use-package doom-modeline
-  :ensure t
-  :init (doom-modeline-mode 1))
+  (use-package doom-modeline
+    :ensure t
+    :init (doom-modeline-mode 1))
 #+end_src
 ** Fill Column
 #+begin_src emacs-lisp
