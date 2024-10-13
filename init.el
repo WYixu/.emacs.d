@@ -2,29 +2,29 @@
 (when (file-exists-p custom-file)
   (load custom-file))
 
-(scroll-bar-mode -1)
-(tool-bar-mode -1)
-(menu-bar-mode -1)
-(tooltip-mode -1)
-(set-fringe-mode 10)
+(scroll-bar-mode -1) ;; Turn off scroll bar
+(tool-bar-mode -1) ;; Turn off tool bar
+(menu-bar-mode -1) ;; Turn off menu bar
+(tooltip-mode -1) ;; Turn off tooltips 
+(set-fringe-mode 10) ;; Set left & right blank to 10 pixels
 
 (setq inhibit-startup-message t)
 
-(set-face-attribute 'default nil :font "JetBrainsMonoNL Nerd Font Propo")
-(set-face-attribute 'variable-pitch nil :font "Noto Sans CJK SC")
-(set-fontset-font t 'han "Noto Sans CJK SC")
-(set-fontset-font t 'kana "Noto Sans CJK JP")
-(set-fontset-font t 'cjk-misc "Noto Sans CJK JP")
+(defun mine/font-settings ()
+  (set-face-attribute 'default nil :font "JetBrainsMonoNL Nerd Font Propo")
+  (set-face-attribute 'variable-pitch nil :font "Noto Sans CJK SC")
+  (set-fontset-font t 'han "Noto Sans CJK SC")
+  (set-fontset-font t 'kana "Noto Sans CJK JP")
+  (set-fontset-font t 'cjk-misc "Noto Sans CJK JP"))
+(add-hook 'server-after-make-frame-hook #'mine/font-settings)
 
-(setq spilt-width-threshold 0)
-(setq spilt-height-threshold nil)
+(setq split-width-threshold 0)
+(setq split-height-threshold nil)
 
 (column-number-mode)
 (global-display-line-numbers-mode t)
 (dolist (mode '(org-mode-hook
-		term-mode-hook
-		shell-mode-hook
-		eshell-mode-hook))
+		vterm-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
 (require 'package)
@@ -40,13 +40,29 @@
 (require 'use-package)
 (setq use-package-always-ensure t)
 
+(defvar --backup-directory (concat user-emacs-directory "backups"))
+(if (not (file-exists-p --backup-directory))
+    (make-directory --backup-directory t))
+(setq backup-directory-alist `(("." . ,--backup-directory)))
+(setq make-backup-files t               ; backup of a file the first time it is saved.
+      backup-by-copying t               ; don't clobber symlinks
+      version-control t                 ; version numbers for backup files
+      delete-old-versions t             ; delete excess backup files silently
+      delete-by-moving-to-trash t
+      kept-old-versions 6               ; oldest versions to keep when a new numbered backup is made (default: 2)
+      kept-new-versions 9               ; newest versions to keep when a new numbered backup is made (default: 2)
+      auto-save-default t               ; auto-save every buffer that visits a file
+      auto-save-timeout 20              ; number of seconds idle time before auto-save (default: 30)
+      auto-save-interval 200            ; number of keystrokes between auto-saves (default: 300)
+      )
+
 (use-package doom-themes
   :ensure t
   :config
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (load-theme 'doom-oksolar-light t)
+  (load-theme 'doom-solarized-light t)
 
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
@@ -62,6 +78,41 @@
 
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
+
+(keymap-global-set "<escape>" 'keyboard-escape-quit)
+
+(use-package evil
+  :init
+  (setq evil-want-integration t)
+  (setq evil-want-keybinding nil)
+  (setq evil-want-C-u-scroll t)
+  (setq evil-want-C-i-jump nil)
+  :config
+  (evil-mode)
+  :custom
+  (evil-respect-visual-line-mode 1)
+  (evil-undo-system 'undo-redo))
+
+(use-package evil-collection
+  :after evil
+  :config
+  (evil-collection-init))
+
+(use-package general
+  :config
+  (general-evil-setup t)
+  (general-create-definer mine/leader-keys
+    :keymaps '(normal insert visual emacs)
+    :prefix "SPC"
+    :global-prefix "C-SPC")
+
+  (mine/leader-keys
+    "o" '(:ignore o :which-key "org-mode")
+    "oa" '(org-agenda :which-key "org-agenda")
+    "or" '(org-redisplay-inline-images :which-key "redisplay inline images")
+
+    "t" '(:ignore t :which-key "toggles")
+    "tt" '(counsel-load-theme :which-key "choose-theme")))
 
 (use-package ivy
   :diminish
@@ -109,6 +160,52 @@
   ([remap describe-variable] . counsel-describe-variable)
   ([remap describe-key] . helpful-key))
 
+(use-package lsp-mode
+  :commands (lsp lsp-deferred)
+  :init
+  (setq lsp-keymap-prefix "C-c l")
+  :config
+  (lsp-enable-which-key-integration t)
+  :custom
+  (lsp-idle-delay 0.2))
+
+(use-package lsp-ui
+  :hook (lsp-mode . lsp-ui-mode))
+
+(use-package lsp-pyright
+  :ensure t
+  :hook (python-mode . (lambda ()
+                         (require 'lsp-pyright)
+                         (lsp-deferred))))
+(use-package python
+  :custom
+  (python-shell-virtualenv-root "~/venv"))
+
+(use-package company
+  :after lsp-mode
+  :hook
+  (lsp-mode . company-mode)
+  (ledger-mode . company-mode)
+  :bind
+  (:map company-active-map
+	("<tab>" . company-complete-selection))
+  (:map lsp-mode-map
+        ("<tab>" . company-indent-or-complete-common))
+  :custom
+  (company-minimum-prefix-length 1)
+  (company-idle-delay 0.0))
+
+(use-package flycheck
+  :ensure t
+  :init
+  (global-flycheck-mode)
+  (flymake-mode nil)
+  :custom
+  (lsp-diagnostics-provider :flycheck))
+
+(use-package origami
+  :hook (prog-mode . origami-mode))
+
 (use-package projectile
   :diminish projectile-mode
   :config (projectile-mode)
@@ -122,9 +219,10 @@
 
 (defun mine/org-mode-setup ()
   (org-indent-mode)
-  (auto-fill-mode 1)
+  (auto-fill-mode 0)
   (display-line-numbers-mode 0)
-  (setq evil-auto-intent nil))
+  (setq evil-auto-intent nil)
+  (setq word-wrap-by-category t))
 
 (use-package org
   :hook (org-mode . mine/org-mode-setup)
@@ -148,6 +246,12 @@
        (todo "TODO"
 	     ((org-agenda-overriding-header "All Tasks")))))))
 
+  ;; =============
+  ;; === Latex ===
+  ;; =============
+  (org-preview-latex-default-process 'dvisvgm)
+  (org-format-latex-options '(:scale 0.4))
+
   :config
   (advice-add 'org-refile :after 'org-save-all-org-buffers)
 
@@ -164,7 +268,7 @@
   (require 'org-tempo)
   (add-to-list 'org-modules 'org-tempo)
   (add-to-list 'org-structure-template-alist
-		 '("el" . "src emacs-lisp"))
+	       '("el" . "src emacs-lisp"))
 
   ;; =============
   ;; === Babel ===
@@ -172,15 +276,50 @@
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((emacs-lisp . t)
-     (python . t))))
+     (python . t)
+     (shell . t))))
 
 (defun mine/org-babel-tangle-config ()
   (when (file-equal-p (buffer-file-name)
 		      (expand-file-name "~/.emacs.d/init.org"))
-  (let ((org-confirm-babel-evaluate nil))
-    (org-babel-tangle))))
+    (let ((org-confirm-babel-evaluate nil))
+      (org-babel-tangle))))
 
 (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'mine/org-babel-tangle-config)))
+
+(use-package ledger-mode
+  :init
+  (setq ledger-clear-whole-transactions 1)
+  :config
+  (add-to-list 'evil-emacs-state-modes 'ledger-report-mode)
+  :mode "\\.ledger\\'")
+
+(use-package term
+  :config
+  (setq explicit-shell-file-name "fish")
+  (setq term-prompt-regexp "^❯ *"))
+
+(use-package vterm
+  :commands vterm
+  :config
+  (setq vterm-shell "/bin/fish")
+  (setq term-prompt-regexp "^❯ *")
+  (setq vterm-max-scrollback 10000))
+
+(use-package dired
+  :ensure nil
+  :commands (dired dired-jump)
+  :bind (("C-x C-j" . dired-jump))
+  :custom 
+  (dired-kill-when-opening-new-dired-buffer t)
+  (dired-listing-switches "-agho --group-directories-first")
+  :config
+  (evil-collection-define-key 'normal 'dired-mode-map
+    "h" 'dired-up-directory
+    "l" 'dired-find-file))
+
+(use-package nerd-icons-dired
+  :hook (dired-mode . nerd-icons-dired-mode))
 
 (use-package doom-modeline
   :ensure t
@@ -202,36 +341,3 @@
   (rime-posframe-style 'vertical)
   (rime-posframe-properties (list :internal-border-width 10
 				  :font "Noto Sans CJK SC Bold")))
-
-(keymap-global-set "<escape>" 'keyboard-escape-quit)
-
-(use-package evil
-  :init
-  (setq evil-want-integration t)
-  (setq evil-want-keybinding nil)
-  (setq evil-want-C-u-scroll t)
-  (setq evil-want-C-i-jump nil)
-  :config
-  (evil-mode)
-  :custom
-  (evil-respect-visual-line-mode 1)
-  (evil-undo-system 'undo-redo))
-
-(use-package evil-collection
-  :after evil
-  :config
-  (evil-collection-init))
-
-(use-package general
-  :config
-  (general-evil-setup t)
-  (general-create-definer mine/leader-keys
-    :keymaps '(normal insert visual emacs)
-    :prefix "SPC"
-    :global-prefix "C-SPC")
-
-  (mine/leader-keys
-    "o" '(:ignore o :which-key "Org-mode")
-	"oa" '(org-agenda :which-key "Org-agenda")))
-    "t" '(:ignore t :which-key "toggles")
-    "tt" '(counsel-load-theme :which-key "choose-theme")
