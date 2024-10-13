@@ -2,50 +2,75 @@
 #+PROPERTY: header-args:emacs-lisp :tangle ./init.el
 
 * Custom File Settings
+
 Separate custom file or Emacs will mess the =init.el= file.
+
 #+begin_src emacs-lisp
   (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
   (when (file-exists-p custom-file)
     (load custom-file))
 #+end_src
+
 * Basic UI Settings
-** Remove all the GUI
+
+** Remove All the GUI
+
+Remove GUI parts to keep a minimal & TUI look.
+
 #+begin_src emacs-lisp
-  (scroll-bar-mode -1)
-  (tool-bar-mode -1)
-  (menu-bar-mode -1)
-  (tooltip-mode -1)
-  (set-fringe-mode 10)
+  (scroll-bar-mode -1) ;; Turn off scroll bar
+  (tool-bar-mode -1) ;; Turn off tool bar
+  (menu-bar-mode -1) ;; Turn off menu bar
+  (tooltip-mode -1) ;; Turn off tooltips 
+  (set-fringe-mode 10) ;; Set left & right blank to 10 pixels
 #+end_src
+
 Also, we should remove startup message.
+
 #+begin_src emacs-lisp
   (setq inhibit-startup-message t)
 #+end_src
-** Font settings
+
+** Font Settings
+
+I use JetBrains Mono Font without ligatures for codes.
+For CJK fonts, I use Noto Sans.
+
 #+begin_src emacs-lisp
-  (set-face-attribute 'default nil :font "JetBrainsMonoNL Nerd Font Propo")
-  (set-face-attribute 'variable-pitch nil :font "Noto Sans CJK SC")
-  (set-fontset-font t 'han "Noto Sans CJK SC")
-  (set-fontset-font t 'kana "Noto Sans CJK JP")
-  (set-fontset-font t 'cjk-misc "Noto Sans CJK JP")
+  (defun mine/font-settings ()
+    (set-face-attribute 'default nil :font "JetBrainsMonoNL Nerd Font Propo")
+    (set-face-attribute 'variable-pitch nil :font "Noto Sans CJK SC")
+    (set-fontset-font t 'han "Noto Sans CJK SC")
+    (set-fontset-font t 'kana "Noto Sans CJK JP")
+    (set-fontset-font t 'cjk-misc "Noto Sans CJK JP"))
+  (add-hook 'server-after-make-frame-hook #'mine/font-settings)
 #+end_src
-** Always split horizonally
-This codeblock may not work as intended.
+
+** Split Settings
+
+Always split horizonaly (vsplit).
+
 #+begin_src emacs-lisp
-  (setq spilt-width-threshold 0)
-  (setq spilt-height-threshold nil)
+  (setq split-width-threshold 0)
+  (setq split-height-threshold nil)
 #+end_src
-** Display column number
+
+** Column Number
+
+Enable column number globally. Disable it for certain modes.
+
 #+begin_src emacs-lisp
   (column-number-mode)
   (global-display-line-numbers-mode t)
   (dolist (mode '(org-mode-hook
-  		term-mode-hook
-  		shell-mode-hook
-  		eshell-mode-hook))
+  		vterm-mode-hook))
     (add-hook mode (lambda () (display-line-numbers-mode 0))))
 #+end_src
-* Set up package source
+
+* Set up Package Source
+
+Use =use-package= for package management.
+
 #+begin_src emacs-lisp
   (require 'package)
   (setq package-archives '(("melpa" . "https://melpa.org/packages/")
@@ -60,9 +85,11 @@ This codeblock may not work as intended.
   (require 'use-package)
   (setq use-package-always-ensure t)
 #+end_src
+
 * Backup setting
-Change the backup behavior.
-Backups should be saved in a certain folder without messing normal files.
+
+Backups are saved in a certain folder without messing normal files.
+
 #+begin_src emacs-lisp
   (defvar --backup-directory (concat user-emacs-directory "backups"))
   (if (not (file-exists-p --backup-directory))
@@ -80,10 +107,14 @@ Backups should be saved in a certain folder without messing normal files.
         auto-save-interval 200            ; number of keystrokes between auto-saves (default: 300)
         )
 #+end_src
+
 * Themes
+
 ** Doom themes
+
 Use doom-themes as the theme source. This codeblock is copied from the
 official README, be careful with problems.
+
 #+begin_src emacs-lisp
   (use-package doom-themes
     :ensure t
@@ -91,7 +122,7 @@ official README, be careful with problems.
     ;; Global settings (defaults)
     (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
           doom-themes-enable-italic t) ; if nil, italics is universally disabled
-    (load-theme 'doom-solarized-light t)
+    (load-theme 'doom-solarized-light t) ; use solarized light theme
 
     ;; Enable flashing mode-line on errors
     (doom-themes-visual-bell-config)
@@ -103,17 +134,89 @@ official README, be careful with problems.
     ;; Corrects (and improves) org-mode's native fontification.
     (doom-themes-org-config))
 #+end_src
+
 ** Icons
+
+Load nerd icons. May not needed.
+
 #+begin_src emacs-lisp
-(use-package nerd-icons)
+  (use-package nerd-icons)
 #+end_src
+
 ** Rainbow delimiters
+
+Change parens color to be rainbow. Extremely important for lisp.
+
 #+begin_src emacs-lisp
   (use-package rainbow-delimiters
     :hook (prog-mode . rainbow-delimiters-mode))
 #+end_src
+
+* Keybindings
+
+** ESC
+
+Map =<escape>= to the same function as =<C-g>=. A good habit from vim.
+
+#+begin_src emacs-lisp
+  (keymap-global-set "<escape>" 'keyboard-escape-quit)
+#+end_src
+
+** Evil
+
+Use Evil mode to bring back beloved vim editing experience.
+
+#+begin_src emacs-lisp
+  (use-package evil
+    :init
+    (setq evil-want-integration t)
+    (setq evil-want-keybinding nil)
+    (setq evil-want-C-u-scroll t)
+    (setq evil-want-C-i-jump nil)
+    :config
+    (evil-mode)
+    :custom
+    (evil-respect-visual-line-mode 1)
+    (evil-undo-system 'undo-redo))
+#+end_src
+
+Use evil collection for most mode compatibility.
+
+#+begin_src emacs-lisp
+  (use-package evil-collection
+    :after evil
+    :config
+    (evil-collection-init))
+#+end_src
+
+** General
+
+Use general to get vim style leader key keybindings.
+
+#+begin_src emacs-lisp
+  (use-package general
+    :config
+    (general-evil-setup t)
+    (general-create-definer mine/leader-keys
+      :keymaps '(normal insert visual emacs)
+      :prefix "SPC"
+      :global-prefix "C-SPC") ;; <C-SPC> is contradict to fcitx5 default settings, should turn off fcitx5 in most cases
+
+    (mine/leader-keys
+      "o" '(:ignore o :which-key "org-mode")
+      "oa" '(org-agenda :which-key "org-agenda")
+      "or" '(org-redisplay-inline-images :which-key "redisplay inline images")
+
+      "t" '(:ignore t :which-key "toggles")
+      "tt" '(counsel-load-theme :which-key "choose-theme")))
+#+end_src
+
 * Ivy
+
 ** Ivy
+
+Ivy is a fuzzy finder.
+
 #+begin_src emacs-lisp
   (use-package ivy
     :diminish
@@ -133,7 +236,11 @@ official README, be careful with problems.
     :init
     (ivy-mode 1))
 #+end_src
+
 ** Counsel
+
+Counsel replace many default functions like =<M-x>= to a better ivy compatible version.
+
 #+begin_src emacs-lisp
   (use-package counsel
     :bind (("M-x" . counsel-M-x)
@@ -144,34 +251,151 @@ official README, be careful with problems.
     :custom
     (ivy-initial-inputs-alist nil))
 #+end_src
+
 ** Ivy-rich
+
+Ivy-rich is additional functions for ivy.
+
 #+begin_src emacs-lisp
   (use-package ivy-rich
     :init (ivy-rich-mode 1))
 #+end_src
+
 * Help
+
 ** Which key
+
+Which shows key descriptions for most compatible key-bindings. Very useful for learn a new package or setup.
+
 #+begin_src emacs-lisp
-(use-package which-key
-  :init (which-key-mode)
-  :diminish which-key-mode
-  :config
-  (setq which-key-idle-delay 0.3))
+  (use-package which-key
+    :init (which-key-mode)
+    :diminish which-key-mode
+    :config
+    (setq which-key-idle-delay 0.3))
 #+end_src
+
 ** Helpful
+
+Helpful is a help page rewriter that provides more functionalities.
+
 #+begin_src emacs-lisp
-(use-package helpful
-  :custom
-  (counsel-describe-function-function #'helpful-callable)
-  (counsel-describe-variable-function #'helpful-variable)
-  :bind
-  ([remap describe-function] . counsel-describe-function)
-  ([remap describe-command] . helpful-command)
-  ([remap describe-variable] . counsel-describe-variable)
-  ([remap describe-key] . helpful-key))
+  (use-package helpful
+    :custom
+    (counsel-describe-function-function #'helpful-callable)
+    (counsel-describe-variable-function #'helpful-variable)
+    :bind
+    ([remap describe-function] . counsel-describe-function)
+    ([remap describe-command] . helpful-command)
+    ([remap describe-variable] . counsel-describe-variable)
+    ([remap describe-key] . helpful-key))
 #+end_src
-* Project
+
+* Development
+
+** Languages
+
+*** LSP
+
+Use lsp-mode for lsp functionalities.
+
+#+begin_src emacs-lisp
+  (use-package lsp-mode
+    :commands (lsp lsp-deferred)
+    :init
+    (setq lsp-keymap-prefix "C-c l")
+    :config
+    (lsp-enable-which-key-integration t)
+    :custom
+    (lsp-idle-delay 0.2))
+#+end_src
+
+**** LSP-UI
+
+Use lsp-ui for sideline diagnostics. Note that it need more configurations.
+
+#+begin_src emacs-lisp
+  (use-package lsp-ui
+    :hook (lsp-mode . lsp-ui-mode))
+#+end_src
+
+*** Python
+
+Load venv.
+
+#+begin_src emacs-lisp
+  (use-package python
+    :custom
+    (python-shell-virtualenv-root "~/venv"))
+#+end_src
+
+Load pyright for lsp.
+
+#+begin_src emacs-lisp
+  (use-package lsp-pyright
+    :ensure t
+    :hook (python-mode . (lambda ()
+                           (require 'lsp-pyright)
+                           (lsp-deferred))))
+#+end_src
+
+** Company Mode
+
+Use company mode for display completions.
+
+#+begin_src emacs-lisp
+  (use-package company
+    :after lsp-mode
+    :hook
+    (lsp-mode . company-mode)
+    (ledger-mode . company-mode)
+    :bind
+    (:map company-active-map
+  	("<tab>" . company-complete-selection))
+    (:map lsp-mode-map
+          ("<tab>" . company-indent-or-complete-common))
+    :custom
+    (company-minimum-prefix-length 1)
+    (company-idle-delay 0.0))
+#+end_src
+
+** Flycheck
+
+Use flycheck to handle diagnostics.
+
+#+begin_src emacs-lisp
+  (use-package flycheck
+    :ensure t
+    :init
+    (global-flycheck-mode)
+    (flymake-mode nil)
+    :custom
+    (lsp-diagnostics-provider :flycheck))
+#+end_src
+
+** Folding
+
+Use origami to handle code folding
+
+#+begin_src emacs-lisp
+  (use-package origami
+    :hook (prog-mode . origami-mode))
+#+end_src
+
+** Magit
+
+Magit is a magical git interface for Emacs.
+
+#+begin_src emacs-lisp
+  (use-package magit
+    :custom
+    (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
+#+end_src
+
 ** Projectile
+
+Use projectile for project management. (Rarely used)
+
 #+begin_src emacs-lisp
   (use-package projectile
     :diminish projectile-mode
@@ -180,15 +404,13 @@ official README, be careful with problems.
     :bind-keymap
     ("C-c p" . projectile-command-map))
 #+end_src
-** Magit
-#+begin_src emacs-lisp
-(use-package magit
-  :custom
-  (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
-#+end_src
+
 * Org-mode
+
 ** Main
+
 Org-mode hook
+
 #+begin_src emacs-lisp
   (defun mine/org-mode-setup ()
     (org-indent-mode)
@@ -197,7 +419,10 @@ Org-mode hook
     (setq evil-auto-intent nil)
     (setq word-wrap-by-category t))
 #+end_src
+
 Main org-mode config.
+Look at comments for explanation.
+
 #+begin_src emacs-lisp
   (use-package org
     :hook (org-mode . mine/org-mode-setup)
@@ -256,6 +481,9 @@ Main org-mode config.
 #+end_src
 
 ** Auto tangle config
+
+Config org-babel-tangle to auto export this file to =init.el=.
+
 #+begin_src emacs-lisp
   (defun mine/org-babel-tangle-config ()
     (when (file-equal-p (buffer-file-name)
@@ -265,8 +493,11 @@ Main org-mode config.
 
   (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'mine/org-babel-tangle-config)))
 #+end_src
+
 * Ledger-mode
-** Main
+
+Ledger mode is for ledger, a plain text accounting tool.
+
 #+begin_src emacs-lisp
   (use-package ledger-mode
     :init
@@ -275,25 +506,28 @@ Main org-mode config.
     (add-to-list 'evil-emacs-state-modes 'ledger-report-mode)
     :mode "\\.ledger\\'")
 #+end_src
+
 * Command Line
-** Term-mode
-#+begin_src emacs-lisp
-  (use-package term
-    :config
-    (setq explicit-shell-file-name "fish")
-    (setq term-prompt-regexp "^❯ *"))
-#+end_src
+
 ** VTerm
+
+Use vterm for most terminal fuctions.
+
 #+begin_src emacs-lisp
   (use-package vterm
     :commands vterm
     :config
     (setq vterm-shell "/bin/fish")
-    (setq term-prompt-regexp "^❯ *")
+    (setq term-prompt-regexp "^❯ *") ;; This works not as intended
     (setq vterm-max-scrollback 10000))
 #+end_src
+
 * File Management
+
 ** Dired
+
+Dired is the default file management utility for emacs and it works well in most cases.
+
 #+begin_src emacs-lisp
   (use-package dired
     :ensure nil
@@ -307,19 +541,33 @@ Main org-mode config.
       "h" 'dired-up-directory
       "l" 'dired-find-file))
 #+end_src
+
 *** Icons
+
+To have icons in dired, nerd-icons-dired is needed.
+
 #+begin_src emacs-lisp
   (use-package nerd-icons-dired
     :hook (dired-mode . nerd-icons-dired-mode))
 #+end_src
+
 * Visual
+
 ** Modeline
+
+Doom modeline is a good looking modeline for Emacs.
+The default behavior is good enough.
+
 #+begin_src emacs-lisp
   (use-package doom-modeline
     :ensure t
     :init (doom-modeline-mode 1))
 #+end_src
+
 ** Fill Column
+
+Visual-fill-column is used for display org-mode and latex-mode contents in the middle of screen.
+
 #+begin_src emacs-lisp
   (defun mine/visual-fill-setup ()
     (setq visual-fill-column-width 80
@@ -330,8 +578,13 @@ Main org-mode config.
     :defer t
     :hook ((org-mode latex-mode) . mine/visual-fill-setup))
 #+end_src
+
 * Input Methond
+
 ** Rime
+
+Use rime for Chinese input.
+
 #+begin_src emacs-lisp
   (use-package rime
     :custom
@@ -340,47 +593,4 @@ Main org-mode config.
     (rime-posframe-style 'vertical)
     (rime-posframe-properties (list :internal-border-width 10
   				  :font "Noto Sans CJK SC Bold")))
-#+end_src
-* Keybindings
-** ESC
-#+begin_src emacs-lisp
-  (keymap-global-set "<escape>" 'keyboard-escape-quit)
-#+end_src
-** Evil
-#+begin_src emacs-lisp
-  (use-package evil
-    :init
-    (setq evil-want-integration t)
-    (setq evil-want-keybinding nil)
-    (setq evil-want-C-u-scroll t)
-    (setq evil-want-C-i-jump nil)
-    :config
-    (evil-mode)
-    :custom
-    (evil-respect-visual-line-mode 1)
-    (evil-undo-system 'undo-redo))
-#+end_src
-Use evil collection for most mode compatibility.
-#+begin_src emacs-lisp
-  (use-package evil-collection
-    :after evil
-    :config
-    (evil-collection-init))
-#+end_src
-** General
-Use general to get vim style leader key keybindings.
-#+begin_src emacs-lisp
-  (use-package general
-    :config
-    (general-evil-setup t)
-    (general-create-definer mine/leader-keys
-      :keymaps '(normal insert visual emacs)
-      :prefix "SPC"
-      :global-prefix "C-SPC")
-
-    (mine/leader-keys
-      "o" '(:ignore o :which-key "Org-mode")
-  	"oa" '(org-agenda :which-key "Org-agenda")))
-      "t" '(:ignore t :which-key "toggles")
-      "tt" '(counsel-load-theme :which-key "choose-theme")
 #+end_src

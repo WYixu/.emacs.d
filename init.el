@@ -62,7 +62,7 @@
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (load-theme 'doom-solarized-light t)
+  (load-theme 'doom-solarized-light t) ; use solarized light theme
 
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
@@ -104,7 +104,7 @@
   (general-create-definer mine/leader-keys
     :keymaps '(normal insert visual emacs)
     :prefix "SPC"
-    :global-prefix "C-SPC")
+    :global-prefix "C-SPC") ;; <C-SPC> is contradict to fcitx5 default settings, should turn off fcitx5 in most cases
 
   (mine/leader-keys
     "o" '(:ignore o :which-key "org-mode")
@@ -172,14 +172,15 @@
 (use-package lsp-ui
   :hook (lsp-mode . lsp-ui-mode))
 
+(use-package python
+  :custom
+  (python-shell-virtualenv-root "~/venv"))
+
 (use-package lsp-pyright
   :ensure t
   :hook (python-mode . (lambda ()
                          (require 'lsp-pyright)
                          (lsp-deferred))))
-(use-package python
-  :custom
-  (python-shell-virtualenv-root "~/venv"))
 
 (use-package company
   :after lsp-mode
@@ -206,16 +207,16 @@
 (use-package origami
   :hook (prog-mode . origami-mode))
 
+(use-package magit
+  :custom
+  (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
+
 (use-package projectile
   :diminish projectile-mode
   :config (projectile-mode)
   :custom ((projectile-completion-system 'ivy))
   :bind-keymap
   ("C-c p" . projectile-command-map))
-
-(use-package magit
-  :custom
-  (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 
 (defun mine/org-mode-setup ()
   (org-indent-mode)
@@ -294,16 +295,11 @@
   (add-to-list 'evil-emacs-state-modes 'ledger-report-mode)
   :mode "\\.ledger\\'")
 
-(use-package term
-  :config
-  (setq explicit-shell-file-name "fish")
-  (setq term-prompt-regexp "^❯ *"))
-
 (use-package vterm
   :commands vterm
   :config
   (setq vterm-shell "/bin/fish")
-  (setq term-prompt-regexp "^❯ *")
+  (setq term-prompt-regexp "^❯ *") ;; This works not as intended
   (setq vterm-max-scrollback 10000))
 
 (use-package dired
