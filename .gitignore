@@ -10,3 +10,6 @@ custom.el
 projectile-bookmarks.eld
 recentf
 
+/.last-package-update-day
+/.lsp-session-v1
+/tramp

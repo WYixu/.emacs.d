@@ -23,6 +23,12 @@
 (setq split-width-threshold 0)
 (setq split-height-threshold nil)
 
+;; Set frame transparency
+(set-frame-parameter (selected-frame) 'alpha '(90 . 90))
+(add-to-list 'default-frame-alist '(alpha . (90 . 90)))
+(set-frame-parameter (selected-frame) 'fullscreen 'maximized)
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
+
 (column-number-mode)
 (global-display-line-numbers-mode t)
 (dolist (mode '(org-mode-hook
@@ -150,6 +156,7 @@
 	 :map minibuffer-local-map
 	 ("C-r" . 'counsel-minibuffer-history))
   :custom
+  (counsel-linux-app-format-function #'counsel-linux-app-format-function-name-only)
   (ivy-initial-inputs-alist nil))
 
 (use-package ivy-rich
@@ -262,7 +269,7 @@
   ;; === Latex ===
   ;; =============
   (org-preview-latex-default-process 'dvisvgm)
-  (org-format-latex-options '(:scale 0.4))
+  (org-format-latex-options '(:scale 1))
 
   :config
   (advice-add 'org-refile :after 'org-save-all-org-buffers)
