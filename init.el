@@ -35,6 +35,10 @@
 		vterm-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
+(setq enable-recursive-minibuffers t)
+
+(setq read-extended-command-predicate #'command-completion-default-include-p)
+
 (require 'package)
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
 			 ("org" . "https:/orgmode.org/elpa/")
@@ -132,36 +136,42 @@
     "t" '(:ignore t :which-key "toggles")
     "tt" '(counsel-load-theme :which-key "choose-theme")))
 
-(use-package ivy
+(use-package vertico
   :diminish
-  :bind (("C-s" . swiper)
-	 :map ivy-minibuffer-map
-	 ("TAB" . ivy-alt-done)
-	 ("C-l" . ivy-alt-done)
-	 ("C-j" . ivy-next-line)
-	 ("C-k" . ivy-previous-line)
-	 :map ivy-switch-buffer-map
-	 ("C-k" . ivy-previous-line)
-	 ("C-l" . ivy-done)
-	 ("C-d" . ivy-switch-buffer-kill)
-	 :map ivy-reverse-i-search-map
-	 ("C-k" . ivy-previous-line)
-	 ("C-d" . ivy-reverse-i-search-kill))
   :init
-  (ivy-mode 1))
-
-(use-package counsel
-  :bind (("M-x" . counsel-M-x)
-	 ("C-x b" . counsel-switch-buffer)
-	 ("C-x C-f" . counsel-find-file)
-	 :map minibuffer-local-map
-	 ("C-r" . 'counsel-minibuffer-history))
+  (vertico-mode 1)
+  :bind (:map vertico-map
+              ("C-j" . vertico-next)
+              ("C-k" . vertico-previous))
   :custom
-  (counsel-linux-app-format-function #'counsel-linux-app-format-function-name-only)
-  (ivy-initial-inputs-alist nil))
+  (vertico-cycle t) ;; Enable cycling for `vertico-next/previous'
+  )
 
-(use-package ivy-rich
-  :init (ivy-rich-mode 1))
+(use-package orderless
+  :custom
+  (completion-styles '(orderless basic))
+  (completion-category-defaults nil)
+  (completion-category-overrides '((file (styles partial-completion)))))
+
+(use-package consult
+  :bind (("C-x b" . consult-buffer)
+	    ("C-s" . consult-line)))
+
+(use-package corfu
+  :hook
+  (lsp-mode . corfu-mode)
+  (ledger-mode . corfu-mode)
+  :custom
+  (corfu-auto t)
+  (corfu-auto-prefix 1)
+  (corfu-auto-delay 0.1)
+  :config
+  (keymap-unset corfu-map "RET"))
+
+(use-package nerd-icons-corfu
+  :after corfu
+  :config
+  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
 (use-package which-key
   :init (which-key-mode)
@@ -183,9 +193,15 @@
   :commands (lsp lsp-deferred)
   :init
   (setq lsp-keymap-prefix "C-c l")
+  (defun mine/lsp-mode-setup-completion ()
+    (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
+          '(orderless))) ;; Configure orderless
+  :hook
+  (lsp-completion-mode . mine/lsp-mode-setup-completion)
   :config
   (lsp-enable-which-key-integration t)
   :custom
+  (lsp-completion-provider :none)
   (lsp-idle-delay 0.2))
 
 (use-package lsp-ui
@@ -200,20 +216,6 @@
   :hook (python-mode . (lambda ()
                          (require 'lsp-pyright)
                          (lsp-deferred))))
-
-(use-package company
-  :after lsp-mode
-  :hook
-  (lsp-mode . company-mode)
-  (ledger-mode . company-mode)
-  :bind
-  (:map company-active-map
-	("<tab>" . company-complete-selection))
-  (:map lsp-mode-map
-        ("<tab>" . company-indent-or-complete-common))
-  :custom
-  (company-minimum-prefix-length 1)
-  (company-idle-delay 0.0))
 
 (use-package flycheck
   :ensure t

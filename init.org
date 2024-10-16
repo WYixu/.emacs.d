@@ -11,7 +11,7 @@ Separate custom file or Emacs will mess the =init.el= file.
     (load custom-file))
 #+end_src
 
-* Basic UI Settings
+* Basic Settings
 
 ** Remove All the GUI
 
@@ -78,6 +78,19 @@ Enable column number globally. Disable it for certain modes.
   		vterm-mode-hook))
     (add-hook mode (lambda () (display-line-numbers-mode 0))))
 #+end_src
+
+** Minibuffer
+
+Enabel minibuffer in minibuffers.
+
+#+begin_src emacs-lisp
+  (setq enable-recursive-minibuffers t)
+#+end_src
+
+Hide commands in =M-x= which do not work in the current mode.
+#+begin_src emacs-lisp
+    (setq read-extended-command-predicate #'command-completion-default-include-p)
+  #+end_src
 
 * Set up Package Source
 
@@ -237,55 +250,69 @@ Use general to get vim style leader key keybindings.
       "tt" '(counsel-load-theme :which-key "choose-theme")))
 #+end_src
 
-* Ivy
+* Completion
 
-** Ivy
+** Vertico
 
-Ivy is a fuzzy finder.
+[[https://github.com/minad/vertico][Vertico]] is a minibuffer completion system.
 
 #+begin_src emacs-lisp
-  (use-package ivy
+  (use-package vertico
     :diminish
-    :bind (("C-s" . swiper)
-  	 :map ivy-minibuffer-map
-  	 ("TAB" . ivy-alt-done)
-  	 ("C-l" . ivy-alt-done)
-  	 ("C-j" . ivy-next-line)
-  	 ("C-k" . ivy-previous-line)
-  	 :map ivy-switch-buffer-map
-  	 ("C-k" . ivy-previous-line)
-  	 ("C-l" . ivy-done)
-  	 ("C-d" . ivy-switch-buffer-kill)
-  	 :map ivy-reverse-i-search-map
-  	 ("C-k" . ivy-previous-line)
-  	 ("C-d" . ivy-reverse-i-search-kill))
     :init
-    (ivy-mode 1))
-#+end_src
-
-** Counsel
-
-Counsel replace many default functions like =<M-x>= to a better ivy compatible version.
-
-#+begin_src emacs-lisp
-  (use-package counsel
-    :bind (("M-x" . counsel-M-x)
-  	 ("C-x b" . counsel-switch-buffer)
-  	 ("C-x C-f" . counsel-find-file)
-  	 :map minibuffer-local-map
-  	 ("C-r" . 'counsel-minibuffer-history))
+    (vertico-mode 1)
+    :bind (:map vertico-map
+                ("C-j" . vertico-next)
+                ("C-k" . vertico-previous))
     :custom
-    (counsel-linux-app-format-function #'counsel-linux-app-format-function-name-only)
-    (ivy-initial-inputs-alist nil))
+    (vertico-cycle t) ;; Enable cycling for `vertico-next/previous'
+    )
 #+end_src
 
-** Ivy-rich
-
-Ivy-rich is additional functions for ivy.
+Orderless is for the fuzzy completion.
 
 #+begin_src emacs-lisp
-  (use-package ivy-rich
-    :init (ivy-rich-mode 1))
+(use-package orderless
+  :custom
+  (completion-styles '(orderless basic))
+  (completion-category-defaults nil)
+  (completion-category-overrides '((file (styles partial-completion)))))
+#+end_src
+
+** Consult
+
+[[https://github.com/minad/consult][Consult]] replace many default functions like =<M-x>= to a better vertico compatible version.
+
+#+begin_src emacs-lisp
+     (use-package consult
+       :bind (("C-x b" . consult-buffer)
+  	    ("C-s" . consult-line)))
+#+end_src
+
+** Corfu
+
+[[https://github.com/minad/corfu][Corfu]] is a in-buffer completion.
+
+#+begin_src emacs-lisp
+  (use-package corfu
+    :hook
+    (lsp-mode . corfu-mode)
+    (ledger-mode . corfu-mode)
+    :custom
+    (corfu-auto t)
+    (corfu-auto-prefix 1)
+    (corfu-auto-delay 0.1)
+    :config
+    (keymap-unset corfu-map "RET"))
+#+end_src
+
+*** Icons
+
+#+begin_src emacs-lisp
+  (use-package nerd-icons-corfu
+    :after corfu
+    :config
+    (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 #+end_src
 
 * Help
@@ -331,9 +358,15 @@ Use lsp-mode for lsp functionalities.
     :commands (lsp lsp-deferred)
     :init
     (setq lsp-keymap-prefix "C-c l")
+    (defun mine/lsp-mode-setup-completion ()
+      (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
+            '(orderless))) ;; Configure orderless
+    :hook
+    (lsp-completion-mode . mine/lsp-mode-setup-completion)
     :config
     (lsp-enable-which-key-integration t)
     :custom
+    (lsp-completion-provider :none)
     (lsp-idle-delay 0.2))
 #+end_src
 
@@ -364,26 +397,6 @@ Load pyright for lsp.
     :hook (python-mode . (lambda ()
                            (require 'lsp-pyright)
                            (lsp-deferred))))
-#+end_src
-
-** Company Mode
-
-Use company mode for display completions.
-
-#+begin_src emacs-lisp
-  (use-package company
-    :after lsp-mode
-    :hook
-    (lsp-mode . company-mode)
-    (ledger-mode . company-mode)
-    :bind
-    (:map company-active-map
-  	("<tab>" . company-complete-selection))
-    (:map lsp-mode-map
-          ("<tab>" . company-indent-or-complete-common))
-    :custom
-    (company-minimum-prefix-length 1)
-    (company-idle-delay 0.0))
 #+end_src
 
 ** Flycheck
