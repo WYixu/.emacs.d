@@ -159,12 +159,12 @@
 
 (use-package corfu
   :hook
-  (lsp-mode . corfu-mode)
+  (prog-mode . corfu-mode)
   (ledger-mode . corfu-mode)
   :custom
   (corfu-auto t)
-  (corfu-auto-prefix 1)
-  (corfu-auto-delay 0.1)
+  (corfu-auto-prefix 3)
+  (corfu-auto-delay 0.0)
   :config
   (keymap-unset corfu-map "RET"))
 
@@ -180,42 +180,17 @@
   (setq which-key-idle-delay 0.3))
 
 (use-package helpful
-  :custom
-  (counsel-describe-function-function #'helpful-callable)
-  (counsel-describe-variable-function #'helpful-variable)
   :bind
-  ([remap describe-function] . counsel-describe-function)
+  ([remap describe-function] . helpful-callable)
   ([remap describe-command] . helpful-command)
-  ([remap describe-variable] . counsel-describe-variable)
+  ([remap describe-variable] . helpful-variable)
   ([remap describe-key] . helpful-key))
 
-(use-package lsp-mode
-  :commands (lsp lsp-deferred)
-  :init
-  (setq lsp-keymap-prefix "C-c l")
-  (defun mine/lsp-mode-setup-completion ()
-    (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
-          '(orderless))) ;; Configure orderless
-  :hook
-  (lsp-completion-mode . mine/lsp-mode-setup-completion)
-  :config
-  (lsp-enable-which-key-integration t)
-  :custom
-  (lsp-completion-provider :none)
-  (lsp-idle-delay 0.2))
-
-(use-package lsp-ui
-  :hook (lsp-mode . lsp-ui-mode))
+(use-package eglot)
 
 (use-package python
   :custom
   (python-shell-virtualenv-root "~/venv"))
-
-(use-package lsp-pyright
-  :ensure t
-  :hook (python-mode . (lambda ()
-                         (require 'lsp-pyright)
-                         (lsp-deferred))))
 
 (use-package flycheck
   :ensure t
