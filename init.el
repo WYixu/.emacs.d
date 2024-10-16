@@ -24,8 +24,8 @@
 (setq split-height-threshold nil)
 
 ;; Set frame transparency
-(set-frame-parameter (selected-frame) 'alpha '(90 . 90))
-(add-to-list 'default-frame-alist '(alpha . (90 . 90)))
+(set-frame-parameter (selected-frame) 'alpha '(95 . 95))
+(add-to-list 'default-frame-alist '(alpha . (95 . 95)))
 (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
 (add-to-list 'default-frame-alist '(fullscreen . maximized))
 
@@ -127,6 +127,7 @@
     "o" '(:ignore o :which-key "org-mode")
     "oa" '(org-agenda :which-key "org-agenda")
     "or" '(org-redisplay-inline-images :which-key "redisplay inline images")
+    "ol" '(org-latex-preview :which-key "preview LaTeX")
 
     "t" '(:ignore t :which-key "toggles")
     "tt" '(counsel-load-theme :which-key "choose-theme")))
@@ -269,7 +270,7 @@
   ;; === Latex ===
   ;; =============
   (org-preview-latex-default-process 'dvisvgm)
-  (org-format-latex-options '(:scale 1))
+  (org-format-latex-options '(:scale 0.4))
 
   :config
   (advice-add 'org-refile :after 'org-save-all-org-buffers)
@@ -334,6 +335,10 @@
 
 (use-package nerd-icons-dired
   :hook (dired-mode . nerd-icons-dired-mode))
+
+(use-package dired-gitignore
+  :config
+  (dired-gitignore-global-mode t))
 
 (use-package doom-modeline
   :ensure t
