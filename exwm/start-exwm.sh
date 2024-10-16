@@ -4,6 +4,7 @@
 # spice-vdagent
 
 xrdb ~/.emacs.d/exwm/Xresources
+export QT_SCALE_FACTOR=2
 
 picom &
 

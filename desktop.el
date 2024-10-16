@@ -39,6 +39,7 @@
   (mine/run-in-background "blueman-applet")
   (mine/run-in-background "pasystray")
   (mine/run-in-background "suwayomi-server")
+  (mine/run-in-background "qbittorrent")
   )
 
 (defun mine/set-wallpaper ()
@@ -108,11 +109,13 @@
 
   (exwm-input-set-key (kbd "s-d") 'counsel-linux-app)
 
+  (setq exwm-systemtray-height 32)
+
   ;; Display all EXWM buffers in every workspace buffer list
   (setq exwm-workspace-show-all-buffers t)
 
   ;; Detach the minibuffer (show it with exwm-workspace-toggle-minibuffer)
-  (setq exwm-workspace-minibuffer-position 'bottom)
+  ;; (setq exwm-workspace-minibuffer-position 'bottom)
 
   (require 'exwm-randr)
   (exwm-randr-enable)
