@@ -1,13 +1,11 @@
 #!/bin/sh
 
-# NOTE: This is only for the live demo, not needed for your configuration!
-# spice-vdagent
-
+# Load dpi settings
 xrdb ~/.emacs.d/exwm/Xresources
 export QT_SCALE_FACTOR=2
 
+# Start compositor
 picom &
 
 # Fire it up
-exec dbus-launch --exit-with-session emacs -mm --debug-init -l ~/.emacs.d/desktop.el
-
+exec dbus-launch --exit-with-session emacs -mm --debug-init -l ~/.emacs.d/exwm/desktop.el

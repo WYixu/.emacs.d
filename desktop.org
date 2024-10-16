@@ -1,5 +1,46 @@
 #+title: Desktop Environment Configurations
-#+PROPERTY: header-args:emacs-lisp :tangle ./desktop.el
+#+PROPERTY: header-args:emacs-lisp :tangle ./exwm/desktop.el
+
+* Desktop file
+
+This is the login file used by DMs.
+
+#+begin_src conf :tangle ./exwm/EXWM.desktop
+  [Desktop Entry]
+  Name=EXWM
+  Comment=Emacs Window Manager
+  Exec=sh /home/yxwang/.emacs.d/exwm/start-exwm.sh
+  TryExec=sh
+  Type=Application
+  X-LightDM-DesktopName=exwm
+  DesktopNames=exwm
+#+end_src
+
+* Xresources
+
+Config DPI here. Note that High DPI performance on Xorg is not good.
+
+#+begin_src conf :tangle ./exwm/Xresources
+  Xft.dpi:   180   # Set this to your desired DPI!  Larger number means bigger text and UI
+#+end_src
+
+* Run emacs with exwm
+
+This is the script used to run emacs with exwm and configs.
+
+#+begin_src sh :tangle ./exwm/start-exwm.sh
+  #!/bin/sh
+
+  # Load dpi settings
+  xrdb ~/.emacs.d/exwm/Xresources
+  export QT_SCALE_FACTOR=2
+
+  # Start compositor
+  picom &
+
+  # Fire it up
+  exec dbus-launch --exit-with-session emacs -mm --debug-init -l ~/.emacs.d/exwm/desktop.el
+#+end_src
 
 * Window Manager
 
