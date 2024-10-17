@@ -48,15 +48,6 @@ For CJK fonts, I use Noto Sans.
   (mine/font-settings) ;; For GUI mode
 #+end_src
 
-** Split Settings
-
-Always split horizonaly (vsplit).
-
-#+begin_src emacs-lisp
-  (setq split-width-threshold 0)
-  (setq split-height-threshold nil)
-#+end_src
-
 ** Background Transparency
 
 #+begin_src emacs-lisp
@@ -589,6 +580,16 @@ Visual-fill-column is used for display org-mode and latex-mode contents in the m
   (use-package visual-fill-column
     :defer t
     :hook ((org-mode latex-mode) . mine/visual-fill-setup))
+#+end_src
+
+** Split Settings
+
+Use [[https://github.com/ajgrf/edwina][edwina]] to manage splitting.
+
+#+begin_src emacs-lisp
+  (use-package edwina
+    :config
+    (edwina-mode 1))
 #+end_src
 
 * Input Methond
