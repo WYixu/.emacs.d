@@ -20,9 +20,6 @@
 (add-hook 'server-after-make-frame-hook #'mine/font-settings) ;; For client mode
 (mine/font-settings) ;; For GUI mode
 
-(setq split-width-threshold 0)
-(setq split-height-threshold nil)
-
 ;; Set frame transparency
 (set-frame-parameter (selected-frame) 'alpha '(95 . 95))
 (add-to-list 'default-frame-alist '(alpha . (95 . 95)))
@@ -87,11 +84,6 @@
 
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
-  ;; Enable custom neotree theme (all-the-icons must be installed!)
-  (doom-themes-neotree-config)
-  ;; or for treemacs users
-  (setq doom-themes-treemacs-theme "doom-colors") ; use "doom-colors" for less minimal icon theme
-  (doom-themes-treemacs-config)
   ;; Corrects (and improves) org-mode's native fontification.
   (doom-themes-org-config))
 
@@ -129,12 +121,21 @@
 
   (mine/leader-keys
     "o" '(:ignore o :which-key "org-mode")
-    "oa" '(org-agenda :which-key "org-agenda")
-    "or" '(org-redisplay-inline-images :which-key "redisplay inline images")
-    "ol" '(org-latex-preview :which-key "preview LaTeX")
+    "oa" '(org-agenda
+           :which-key "agenda")
+    "or" '(org-redisplay-inline-images
+           :which-key "redisplay inline images")
+    "ol" '(org-latex-preview
+           :which-key "preview LaTeX")
+    "oi" '((lambda () (interactive)
+             (find-file (concat org-directory "/index.org")))
+           :which-key "open index")
+    "oc" '(org-capture
+	   :which-key "capture")
 
     "t" '(:ignore t :which-key "toggles")
-    "tt" '(counsel-load-theme :which-key "choose-theme")))
+    "tt" '(consult-theme
+           :which-key "choose-theme")))
 
 (use-package vertico
   :diminish
@@ -156,6 +157,10 @@
 (use-package consult
   :bind (("C-x b" . consult-buffer)
 	    ("C-s" . consult-line)))
+
+(use-package marginalia
+  :init
+  (marginalia-mode 1))
 
 (use-package corfu
   :hook
@@ -192,13 +197,13 @@
   :custom
   (python-shell-virtualenv-root "~/venv"))
 
-(use-package flycheck
-  :ensure t
-  :init
-  (global-flycheck-mode)
-  (flymake-mode -1)
-  :custom
-  (lsp-diagnostics-provider :flycheck))
+;; (use-package flycheck
+;;   :ensure t
+;;   :init
+;;   (global-flycheck-mode)
+;;   (flymake-mode -1)
+;;   :custom
+;;   (lsp-diagnostics-provider :flycheck))
 
 (use-package origami
   :hook (prog-mode . origami-mode))
@@ -224,52 +229,39 @@
 (use-package org
   :hook (org-mode . mine/org-mode-setup)
   :custom
-  ;; ==============
-  ;; === Agenda ===
-  ;; ==============
-  ;; Basic Setting
-  (org-agenda-files
-   '("~/Documents/Notes/"))
+  (org-agenda-files org-directory)
   (org-agenda-start-with-log-mode t)
   (org-log-done 'time)
   (org-log-into-drawer t)
   (org-refile-targets
    '(("archive.org" :maxlevel . 1)))
-
+  
   ;; Customs
   (org-agenda-custom-commands
    '(("d" "Dashboard" ;;Agenda Dashboard
       ((agenda "" ((org-deadline-warning-days 7)))
        (todo "TODO"
-	     ((org-agenda-overriding-header "All Tasks")))))))
+  	     ((org-agenda-overriding-header "All Tasks")))))))
 
-  ;; =============
-  ;; === Latex ===
-  ;; =============
+  (org-capture-templates
+   '(("t" "Todo" entry (file+headline "~/org/todo.org" "Inbox")
+      "* TODO %?\n %i\n %a")))
+
   (org-preview-latex-default-process 'dvisvgm)
   (org-format-latex-options '(:scale 0.4))
 
   :config
   (advice-add 'org-refile :after 'org-save-all-org-buffers)
 
-  ;; =============
-  ;; === Habit ===
-  ;; =============
   (require 'org-habit)
   (add-to-list 'org-modules 'org-habit)
   (setq org-habit-graph-column 60)
 
-  ;; =============
-  ;; === Tempo ===
-  ;; =============
   (require 'org-tempo)
   (add-to-list 'org-modules 'org-tempo)
   (add-to-list 'org-structure-template-alist
-	       '("el" . "src emacs-lisp"))
+               '("el" . "src emacs-lisp"))
 
-  ;; =============
-  ;; === Babel ===
-  ;; =============
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((emacs-lisp . t)
@@ -330,6 +322,10 @@
   :defer t
   :hook ((org-mode latex-mode) . mine/visual-fill-setup))
 
+(use-package edwina
+  :config
+  (edwina-mode 1))
+
 (use-package rime
   :custom
   (default-input-method "rime")
@@ -337,3 +333,8 @@
   (rime-posframe-style 'vertical)
   (rime-posframe-properties (list :internal-border-width 10
 				  :font "Noto Sans CJK SC Bold")))
+
+(use-package elfeed
+  :custom
+  (elfeed-feeds
+   '("https://www.quantamagazine.org/feed/")))

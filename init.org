@@ -141,8 +141,7 @@ Backups are saved in a certain folder without messing normal files.
 
 ** Doom themes
 
-Use doom-themes as the theme source. This codeblock is copied from the
-official README, be careful with problems.
+Use [[https://github.com/doomemacs/themes][doom-themes]] as the theme source.
 
 #+begin_src emacs-lisp
   (use-package doom-themes
@@ -155,18 +154,13 @@ official README, be careful with problems.
 
     ;; Enable flashing mode-line on errors
     (doom-themes-visual-bell-config)
-    ;; Enable custom neotree theme (all-the-icons must be installed!)
-    (doom-themes-neotree-config)
-    ;; or for treemacs users
-    (setq doom-themes-treemacs-theme "doom-colors") ; use "doom-colors" for less minimal icon theme
-    (doom-themes-treemacs-config)
     ;; Corrects (and improves) org-mode's native fontification.
     (doom-themes-org-config))
 #+end_src
 
 ** Icons
 
-Load nerd icons. May not needed.
+Load [[https://github.com/rainstormstudio/nerd-icons.el][nerd icons]]. May not needed.
 
 #+begin_src emacs-lisp
   (use-package nerd-icons)
@@ -174,7 +168,7 @@ Load nerd icons. May not needed.
 
 ** Rainbow delimiters
 
-Change parens color to be rainbow. Extremely important for lisp.
+Change parens color to be [[https://github.com/Fanael/rainbow-delimiters][rainbow]]. Extremely important for lisp.
 
 #+begin_src emacs-lisp
   (use-package rainbow-delimiters
@@ -233,12 +227,21 @@ Use general to get vim style leader key keybindings.
 
     (mine/leader-keys
       "o" '(:ignore o :which-key "org-mode")
-      "oa" '(org-agenda :which-key "org-agenda")
-      "or" '(org-redisplay-inline-images :which-key "redisplay inline images")
-      "ol" '(org-latex-preview :which-key "preview LaTeX")
+      "oa" '(org-agenda
+             :which-key "agenda")
+      "or" '(org-redisplay-inline-images
+             :which-key "redisplay inline images")
+      "ol" '(org-latex-preview
+             :which-key "preview LaTeX")
+      "oi" '((lambda () (interactive)
+               (find-file (concat org-directory "/index.org")))
+             :which-key "open index")
+      "oc" '(org-capture
+  	   :which-key "capture")
 
       "t" '(:ignore t :which-key "toggles")
-      "tt" '(counsel-load-theme :which-key "choose-theme")))
+      "tt" '(consult-theme
+             :which-key "choose-theme")))
 #+end_src
 
 * Completion
@@ -263,11 +266,11 @@ Use general to get vim style leader key keybindings.
 Orderless is for the fuzzy completion.
 
 #+begin_src emacs-lisp
-(use-package orderless
-  :custom
-  (completion-styles '(orderless basic))
-  (completion-category-defaults nil)
-  (completion-category-overrides '((file (styles partial-completion)))))
+  (use-package orderless
+    :custom
+    (completion-styles '(orderless basic))
+    (completion-category-defaults nil)
+    (completion-category-overrides '((file (styles partial-completion)))))
 #+end_src
 
 ** Consult
@@ -278,6 +281,14 @@ Orderless is for the fuzzy completion.
      (use-package consult
        :bind (("C-x b" . consult-buffer)
   	    ("C-s" . consult-line)))
+#+end_src
+
+[[https://github.com/minad/marginalia][Marginalia]] is for more detailed description for consult and vanilla minibuffer switchers.
+
+#+begin_src emacs-lisp
+  (use-package marginalia
+    :init
+    (marginalia-mode 1))
 #+end_src
 
 ** Corfu
@@ -360,13 +371,13 @@ Load venv.
 Use flycheck to handle diagnostics.
 
 #+begin_src emacs-lisp
-  (use-package flycheck
-    :ensure t
-    :init
-    (global-flycheck-mode)
-    (flymake-mode -1)
-    :custom
-    (lsp-diagnostics-provider :flycheck))
+  ;; (use-package flycheck
+  ;;   :ensure t
+  ;;   :init
+  ;;   (global-flycheck-mode)
+  ;;   (flymake-mode -1)
+  ;;   :custom
+  ;;   (lsp-diagnostics-provider :flycheck))
 #+end_src
 
 ** Folding
@@ -416,69 +427,32 @@ Org-mode hook
     (setq word-wrap-by-category t))
 #+end_src
 
-Main org-mode config.
-Look at comments for explanation.
+Main org-mode config. Using noweb for sake of simplicity.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :noweb yes
   (use-package org
     :hook (org-mode . mine/org-mode-setup)
     :custom
-    ;; ==============
-    ;; === Agenda ===
-    ;; ==============
-    ;; Basic Setting
-    (org-agenda-files
-     '("~/Documents/Notes/"))
-    (org-agenda-start-with-log-mode t)
-    (org-log-done 'time)
-    (org-log-into-drawer t)
-    (org-refile-targets
-     '(("archive.org" :maxlevel . 1)))
+    <<Org Agenda Settings>>
 
-    ;; Customs
-    (org-agenda-custom-commands
-     '(("d" "Dashboard" ;;Agenda Dashboard
-        ((agenda "" ((org-deadline-warning-days 7)))
-         (todo "TODO"
-  	     ((org-agenda-overriding-header "All Tasks")))))))
+    <<Org Capture Templates>>
 
-    ;; =============
-    ;; === Latex ===
-    ;; =============
     (org-preview-latex-default-process 'dvisvgm)
     (org-format-latex-options '(:scale 0.4))
 
     :config
     (advice-add 'org-refile :after 'org-save-all-org-buffers)
 
-    ;; =============
-    ;; === Habit ===
-    ;; =============
-    (require 'org-habit)
-    (add-to-list 'org-modules 'org-habit)
-    (setq org-habit-graph-column 60)
+    <<Org Habit>>
 
-    ;; =============
-    ;; === Tempo ===
-    ;; =============
-    (require 'org-tempo)
-    (add-to-list 'org-modules 'org-tempo)
-    (add-to-list 'org-structure-template-alist
-  	       '("el" . "src emacs-lisp"))
+    <<Org Tempo>>
 
-    ;; =============
-    ;; === Babel ===
-    ;; =============
-    (org-babel-do-load-languages
-     'org-babel-load-languages
-     '((emacs-lisp . t)
-       (python . t)
-       (shell . t))))
+    <<Org Babel>>)
 #+end_src
 
 ** Auto tangle config
 
-Config org-babel-tangle to auto export this file to =init.el=.
+Config org-babel-tangle to auto export files in =.emacs.d=.
 
 #+begin_src emacs-lisp
   (defun mine/org-babel-tangle-config ()
@@ -488,6 +462,64 @@ Config org-babel-tangle to auto export this file to =init.el=.
         (org-babel-tangle))))
 
   (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'mine/org-babel-tangle-config)))
+#+end_src
+
+** Agenda
+
+#+Name: Org Agenda Settings
+#+begin_src emacs-lisp :tangle no
+  (org-agenda-files org-directory)
+  (org-agenda-start-with-log-mode t)
+  (org-log-done 'time)
+  (org-log-into-drawer t)
+  (org-refile-targets
+   '(("archive.org" :maxlevel . 1)))
+
+  ;; Customs
+  (org-agenda-custom-commands
+   '(("d" "Dashboard" ;;Agenda Dashboard
+      ((agenda "" ((org-deadline-warning-days 7)))
+       (todo "TODO"
+  	     ((org-agenda-overriding-header "All Tasks")))))))
+#+end_src
+
+** Babel
+
+#+Name: Org Babel
+#+begin_src emacs-lisp :tangle no
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((emacs-lisp . t)
+     (python . t)
+     (shell . t)))
+#+end_src
+
+** Capture
+
+#+Name: Org Capture Templates
+#+begin_src emacs-lisp :tangle no
+  (org-capture-templates
+   '(("t" "Todo" entry (file+headline "~/org/todo.org" "Inbox")
+      "* TODO %?\n %i\n %a")))
+#+end_src
+
+** Habit
+
+#+Name: Org Habit
+#+begin_src emacs-lisp :tangle no
+  (require 'org-habit)
+  (add-to-list 'org-modules 'org-habit)
+  (setq org-habit-graph-column 60)
+#+end_src
+
+** Tempo
+
+#+Name: Org Tempo
+#+begin_src emacs-lisp :tangle no
+  (require 'org-tempo)
+  (add-to-list 'org-modules 'org-tempo)
+  (add-to-list 'org-structure-template-alist
+               '("el" . "src emacs-lisp"))
 #+end_src
 
 * Ledger-mode
@@ -596,7 +628,7 @@ Use [[https://github.com/ajgrf/edwina][edwina]] to manage splitting.
 
 ** Rime
 
-Use rime for Chinese input.
+Use emacs-rime for Chinese input.
 
 #+begin_src emacs-lisp
   (use-package rime
@@ -608,3 +640,11 @@ Use rime for Chinese input.
   				  :font "Noto Sans CJK SC Bold")))
 #+end_src
 
+* RSS Feed
+
+#+begin_src emacs-lisp
+  (use-package elfeed
+    :custom
+    (elfeed-feeds
+     '("https://www.quantamagazine.org/feed/")))
+#+end_src
