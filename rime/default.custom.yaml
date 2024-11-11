@@ -1,3 +1,7 @@
 patch:
     schema_list:
         - schema: double_pinyin
+        - schema: japanese
+#       - schema: luna_pinyin
+#	- schema: cangjie5
+        - schema: zhengma

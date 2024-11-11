@@ -48,6 +48,7 @@
   (package-install 'use-package))
 (require 'use-package)
 (setq use-package-always-ensure t)
+(setq use-package-compute-statistics t)
 
 (use-package auto-package-update
   :custom
@@ -120,7 +121,11 @@
     :global-prefix "C-SPC") ;; <C-SPC> is contradict to fcitx5 default settings, should turn off fcitx5 in most cases
 
   (mine/leader-keys
-    "o" '(:ignore o :which-key "org-mode")
+    "l" '(:ignore t :which-key "ledger-mode")
+    "lr" '(ledger-report
+	   :which-key "report")
+    
+    "o" '(:ignore t :which-key "org-mode")
     "oa" '(org-agenda
            :which-key "agenda")
     "or" '(org-redisplay-inline-images
@@ -149,6 +154,7 @@
   )
 
 (use-package orderless
+  :after vertico
   :custom
   (completion-styles '(orderless basic))
   (completion-category-defaults nil)
@@ -194,6 +200,8 @@
 (use-package eglot)
 
 (use-package python
+  :mode ("\\.py\\'" . python-mode)
+  :interpreter ("python" . python-mode)
   :custom
   (python-shell-virtualenv-root "~/venv"))
 
@@ -209,6 +217,7 @@
   :hook (prog-mode . origami-mode))
 
 (use-package magit
+  :commands (magit-status)
   :custom
   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 
@@ -229,7 +238,7 @@
 (use-package org
   :hook (org-mode . mine/org-mode-setup)
   :custom
-  (org-agenda-files org-directory)
+  (org-agenda-files '("~/org/"))
   (org-agenda-start-with-log-mode t)
   (org-log-done 'time)
   (org-log-into-drawer t)
@@ -245,7 +254,7 @@
 
   (org-capture-templates
    '(("t" "Todo" entry (file+headline "~/org/todo.org" "Inbox")
-      "* TODO %?\n %i\n %a")))
+      "* TODO %?")))
 
   (org-preview-latex-default-process 'dvisvgm)
   (org-format-latex-options '(:scale 0.4))
@@ -259,8 +268,8 @@
 
   (require 'org-tempo)
   (add-to-list 'org-modules 'org-tempo)
-  (add-to-list 'org-structure-template-alist
-               '("el" . "src emacs-lisp"))
+  (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+  (add-to-list 'org-structure-template-alist '("cf" . "src conf"))
 
   (org-babel-do-load-languages
    'org-babel-load-languages
@@ -281,14 +290,20 @@
   (setq ledger-clear-whole-transactions 1)
   :config
   (add-to-list 'evil-emacs-state-modes 'ledger-report-mode)
+  :custom
+  (ledger-reports
+   '(("bal" "%(binary) -f ~/org/PTA/keep.ledger bal")))
   :mode "\\.ledger\\'")
 
 (use-package vterm
   :commands vterm
+  :custom
+  (vterm-timer-delay nil)
+  (vterm-max-scrollback 10000)
+  (vterm-shell "/bin/fish")
   :config
-  (setq vterm-shell "/bin/fish")
   (setq term-prompt-regexp "^❯ *") ;; This works not as intended
-  (setq vterm-max-scrollback 10000))
+  )
 
 (use-package dired
   :ensure nil
@@ -334,7 +349,11 @@
   (rime-posframe-properties (list :internal-border-width 10
 				  :font "Noto Sans CJK SC Bold")))
 
-(use-package elfeed
-  :custom
-  (elfeed-feeds
-   '("https://www.quantamagazine.org/feed/")))
+(defun mine/display-startup-time ()
+  (message "Emacs loaded in %s with %d garbage collections."
+           (format "%.2f seconds"
+                   (float-time
+                   (time-subtract after-init-time before-init-time)))
+           gcs-done))
+
+(add-hook 'emacs-startup-hook #'mine/display-startup-time)
