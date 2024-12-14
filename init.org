@@ -52,8 +52,8 @@ For CJK fonts, I use Noto Sans.
 
 #+begin_src emacs-lisp
 ;; Set frame transparency
-(set-frame-parameter (selected-frame) 'alpha '(95 . 95))
-(add-to-list 'default-frame-alist '(alpha . (95 . 95)))
+;; (set-frame-parameter (selected-frame) 'alpha-background 100)
+;; (add-to-list 'default-frame-alist '(alpha-background 100))
 (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
 (add-to-list 'default-frame-alist '(fullscreen . maximized))
 #+end_src
@@ -107,14 +107,14 @@ Use =use-package= for package management.
 ** Auto update
 
 #+begin_src emacs-lisp
-(use-package auto-package-update
-  :custom
-  (auto-package-update-interval 7)
-  (auto-package-update-prompt-before-update t)
-  (auto-package-update-hide-results nil)
-  :config
-  (auto-package-update-maybe)
-  (auto-package-update-at-time "09:00"))
+  (use-package auto-package-update
+    :custom
+    (auto-package-update-interval 7)
+    (auto-package-update-prompt-before-update t)
+    (auto-package-update-hide-results nil)
+    :config
+    (auto-package-update-maybe)
+    (auto-package-update-at-time "09:00"))
 #+end_src
 
 * Backup setting
@@ -245,6 +245,10 @@ Use general to get vim style leader key keybindings.
       "oc" '(org-capture
   	   :which-key "capture")
 
+      "s" '(:ignore t :which-key "start")
+      "se" #'(mine/shell-create
+  	    :which-key "start eshell")
+
       "t" '(:ignore t :which-key "toggles")
       "tt" '(consult-theme
              :which-key "choose-theme")))
@@ -285,9 +289,10 @@ Orderless is for the fuzzy completion.
 [[https://github.com/minad/consult][Consult]] replace many default functions like =<M-x>= to a better vertico compatible version.
 
 #+begin_src emacs-lisp
-     (use-package consult
-       :bind (("C-x b" . consult-buffer)
-  	    ("C-s" . consult-line)))
+  (use-package consult
+    :bind (("C-x b" . consult-buffer)
+  	 ("M-p" . consult-project-buffer)
+           ("C-s" . consult-line)))
 #+end_src
 
 [[https://github.com/minad/marginalia][Marginalia]] is for more detailed description for consult and vanilla minibuffer switchers.
@@ -307,6 +312,7 @@ Orderless is for the fuzzy completion.
     :hook
     (prog-mode . corfu-mode)
     (ledger-mode . corfu-mode)
+    (eshell-mode . corfu-mode)
     :custom
     (corfu-auto t)
     (corfu-auto-prefix 3)
@@ -360,7 +366,13 @@ Helpful is a help page rewriter that provides more functionalities.
 Use [[https://github.com/joaotavora/eglot][eglot]] for lsp functionalities.
 
 #+begin_src emacs-lisp
-  (use-package eglot)
+  (use-package eglot
+    :hook
+    (rust-mode . eglot-ensure)
+    (python-mode . eglot-ensure)
+    :config
+    ;; Change the inlay hint face to make it slightly more visible
+    (set-face-attribute 'eglot-inlay-hint-face nil :foreground "#8ba34a"))
 #+end_src
 
 *** Python
@@ -373,6 +385,12 @@ Load venv.
     :interpreter ("python" . python-mode)
     :custom
     (python-shell-virtualenv-root "~/venv"))
+#+end_src
+
+*** Rust
+
+#+begin_src emacs-lisp
+  (use-package rust-mode)
 #+end_src
 
 ** Flycheck
@@ -422,6 +440,52 @@ Use projectile for project management. (Rarely used)
     ("C-c p" . projectile-command-map))
 #+end_src
 
+** Eldoc
+
+#+begin_src emacs-lisp
+  (use-package eldoc-box
+    :config
+    (set-face-attribute 'eldoc-box-body nil :font "Roboto Medium")
+    :hook
+    (eglot-managed-mode . eldoc-box-hover-mode))
+#+end_src
+
+* Shell
+
+** Eshell
+
+#+begin_src emacs-lisp
+  (use-package eshell
+    :custom
+    (eshell-scroll-to-bottom-on-input t)
+    (eshell-history-size 10000)
+    (eshell-save-history-on-exit t)
+    (eshell-hist-ignoredups t)
+    :config
+    (setq-local tab-aways-indent 'complete))
+#+end_src
+
+This is a function for create new eshell instance:
+
+#+begin_src emacs-lisp
+(defun mine/shell-create (name)
+   "Create a custom-named eshell buffer with NAME."
+   (interactive "sName: ")
+   (eshell 'new)
+   (let ((new-buffer-name (concat "*eshell-" name "*")))
+     (rename-buffer new-buffer-name t)))
+#+end_src
+
+** Capf-autosuggest
+
+This is a package provide fish-like inline completion.
+
+#+begin_src emacs-lisp
+  (use-package capf-autosuggest
+    :hook
+    (eshell-mode . capf-autosuggest-mode))
+#+end_src
+
 * Org-mode
 
 ** Main
@@ -449,6 +513,9 @@ Main org-mode config. Using noweb for sake of simplicity.
 
     (org-preview-latex-default-process 'dvisvgm)
     (org-format-latex-options '(:scale 0.4))
+    (org-todo-keywords
+     '((sequence "TODO(t)" "|" "DONE(d!)")
+       (sequence "TOREAD" "READING" "|" "READ")))
 
     :config
     (advice-add 'org-refile :after 'org-save-all-org-buffers)
@@ -459,6 +526,9 @@ Main org-mode config. Using noweb for sake of simplicity.
 
     <<Org Babel>>)
 #+end_src
+
+#+RESULTS:
+: #s(hash-table size 65 test eql rehash-size 1.5 rehash-threshold 0.8125 data (:use-package (26456 15274 158126 898000) :init (26456 15274 158123 201000) :init-secs (0 0 174 698000) :use-package-secs (0 0 704 431000) :config (26456 15274 158105 7000) :config-secs (0 0 135 915000)))
 
 ** Auto tangle config
 
@@ -484,6 +554,7 @@ Config org-babel-tangle to auto export files in =.emacs.d=.
   (org-log-into-drawer t)
   (org-refile-targets
    '(("archive.org" :maxlevel . 1)))
+  (org-agenda-window-setup 'only-window)
 
   ;; Customs
   (org-agenda-custom-commands
@@ -510,7 +581,11 @@ Config org-babel-tangle to auto export files in =.emacs.d=.
 #+begin_src emacs-lisp :tangle no
   (org-capture-templates
    '(("t" "Todo" entry (file+headline "~/org/todo.org" "Inbox")
-      "* TODO %?")))
+      "* TODO %?")
+     ("l" "Literature Note" plain (file "~/org/tmp.org")
+      (file "100_Zotero/template.org"))
+     ("b" "TOREAD" entry (file "~/org/booklist.org")
+      "* TOREAD %?\n  :PROPERTIES:\n  :author:\n  :rate:\n  :genre:\n  :END:")))
 #+end_src
 
 ** Habit
@@ -526,10 +601,26 @@ Config org-babel-tangle to auto export files in =.emacs.d=.
 
 #+Name: Org Tempo
 #+begin_src emacs-lisp :tangle no
-    (require 'org-tempo)
-    (add-to-list 'org-modules 'org-tempo)
-    (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
-    (add-to-list 'org-structure-template-alist '("cf" . "src conf"))
+  (require 'org-tempo)
+  (add-to-list 'org-modules 'org-tempo)
+  (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+  (add-to-list 'org-structure-template-alist '("cf" . "src conf"))
+#+end_src
+
+** Org to clipboard
+
+#+begin_src emacs-lisp
+(defun org-to-clipboard ()
+  "Convert the contents of the current buffer or region from Org
+mode to HTML.   Store the result in the clipboard."
+  (interactive)
+  (if (use-region-p)
+      (shell-command-on-region (region-beginning)
+                               (region-end)
+                               "org2clip")
+      (shell-command-on-region (point-min)
+                               (point-max)
+                               "org2clip")))
 #+end_src
 
 * Ledger-mode
@@ -638,6 +729,81 @@ Use [[https://github.com/ajgrf/edwina][edwina]] to manage splitting.
   (use-package edwina
     :config
     (edwina-mode 1))
+#+end_src
+
+Small trick to prevent buffers from poppling everywhere:
+
+#+begin_src emacs-lisp
+(customize-set-variable 'display-buffer-base-action
+  '((display-buffer-reuse-window display-buffer-same-window)
+    (reusable-frames . t)))
+
+(customize-set-variable 'even-window-sizes nil)     ; avoid resizing
+#+end_src
+
+** Popper
+
+[[https://github.com/karthink/popper][Popper]] provides popup windows for Emacs, which is handy for buffers you need immediately and want them disappear immediately.
+
+#+begin_src emacs-lisp
+  (use-package popper
+    :ensure t
+    :bind (("C-`"   . popper-toggle)
+           ("M-`"   . popper-cycle)
+           ("C-M-`" . popper-toggle-type))
+    :init
+    (setq popper-reference-buffers
+          '("\\*Messages\\*"
+            "Output\\*$"
+            "\\*Async Shell Command\\*"
+            helpful-mode
+            eshell-mode
+            compilation-mode))
+    (popper-mode +1)
+    (popper-echo-mode +1))
+#+end_src
+
+* Tab bar
+
+** Tabspace
+Tabspace is a convenient wrapper for =tab-bar.el= and =project.el=
+#+begin_src emacs-lisp
+  (use-package tabspaces
+    :hook (after-init . tabspaces-mode) ;; use this only if you want the minor-mode loaded at startup. 
+    :commands (tabspaces-switch-or-create-workspace
+               tabspaces-open-or-create-project-and-workspace)
+    :custom
+    (tabspaces-use-filtered-buffers-as-default t)
+    (tabspaces-default-tab "Default")
+    (tabspaces-remove-to-default t)
+    (tabspaces-include-buffers '("*scratch*"))
+    (tabspaces-initialize-project-with-todo t)
+    (tabspaces-todo-file-name "project-todo.org")
+    ;; sessions
+    (tabspaces-session t)
+    (tabspaces-session-auto-restore t)
+    (tab-bar-new-tab-choice "*scratch*")
+    :config
+    ;; Filter Buffers for Consult-Buffer
+    (with-eval-after-load 'consult
+      ;; hide full buffer list (still available with "b" prefix)
+      (consult-customize consult--source-buffer :hidden t :default nil)
+      ;; set consult-workspace buffer list
+      (defvar consult--source-workspace
+        (list :name     "Workspace Buffers"
+              :narrow   ?w
+              :history  'buffer-name-history
+              :category 'buffer
+              :state    #'consult--buffer-state
+              :default  t
+              :items    (lambda () (consult--buffer-query
+                                  :predicate #'tabspaces--local-buffer-p
+                                  :sort 'visibility
+                                  :as #'buffer-name)))
+
+        "Set workspace buffer list for consult-buffer.")
+      (add-to-list 'consult-buffer-sources 'consult--source-workspace)))
+
 #+end_src
 
 * Input Methond

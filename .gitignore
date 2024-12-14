@@ -22,3 +22,5 @@
 
 /url
 /.org-id-locations
+/eshell/
+/tabsession.el

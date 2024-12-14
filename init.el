@@ -21,8 +21,8 @@
 (mine/font-settings) ;; For GUI mode
 
 ;; Set frame transparency
-(set-frame-parameter (selected-frame) 'alpha '(95 . 95))
-(add-to-list 'default-frame-alist '(alpha . (95 . 95)))
+;; (set-frame-parameter (selected-frame) 'alpha-background 100)
+;; (add-to-list 'default-frame-alist '(alpha-background 100))
 (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
 (add-to-list 'default-frame-alist '(fullscreen . maximized))
 
@@ -138,6 +138,10 @@
     "oc" '(org-capture
 	   :which-key "capture")
 
+    "s" '(:ignore t :which-key "start")
+    "se" #'(mine/shell-create
+	    :which-key "start eshell")
+
     "t" '(:ignore t :which-key "toggles")
     "tt" '(consult-theme
            :which-key "choose-theme")))
@@ -162,7 +166,8 @@
 
 (use-package consult
   :bind (("C-x b" . consult-buffer)
-	    ("C-s" . consult-line)))
+	 ("M-p" . consult-project-buffer)
+         ("C-s" . consult-line)))
 
 (use-package marginalia
   :init
@@ -172,6 +177,7 @@
   :hook
   (prog-mode . corfu-mode)
   (ledger-mode . corfu-mode)
+  (eshell-mode . corfu-mode)
   :custom
   (corfu-auto t)
   (corfu-auto-prefix 3)
@@ -197,13 +203,21 @@
   ([remap describe-variable] . helpful-variable)
   ([remap describe-key] . helpful-key))
 
-(use-package eglot)
+(use-package eglot
+  :hook
+  (rust-mode . eglot-ensure)
+  (python-mode . eglot-ensure)
+  :config
+  ;; Change the inlay hint face to make it slightly more visible
+  (set-face-attribute 'eglot-inlay-hint-face nil :foreground "#8ba34a"))
 
 (use-package python
   :mode ("\\.py\\'" . python-mode)
   :interpreter ("python" . python-mode)
   :custom
   (python-shell-virtualenv-root "~/venv"))
+
+(use-package rust-mode)
 
 ;; (use-package flycheck
 ;;   :ensure t
@@ -228,6 +242,32 @@
   :bind-keymap
   ("C-c p" . projectile-command-map))
 
+(use-package eldoc-box
+  :config
+  (set-face-attribute 'eldoc-box-body nil :font "Roboto Medium")
+  :hook
+  (eglot-managed-mode . eldoc-box-hover-mode))
+
+(use-package eshell
+  :custom
+  (eshell-scroll-to-bottom-on-input t)
+  (eshell-history-size 10000)
+  (eshell-save-history-on-exit t)
+  (eshell-hist-ignoredups t)
+  :config
+  (setq-local tab-aways-indent 'complete))
+
+(defun mine/shell-create (name)
+   "Create a custom-named eshell buffer with NAME."
+   (interactive "sName: ")
+   (eshell 'new)
+   (let ((new-buffer-name (concat "*eshell-" name "*")))
+     (rename-buffer new-buffer-name t)))
+
+(use-package capf-autosuggest
+  :hook
+  (eshell-mode . capf-autosuggest-mode))
+
 (defun mine/org-mode-setup ()
   (org-indent-mode)
   (auto-fill-mode 0)
@@ -244,6 +284,7 @@
   (org-log-into-drawer t)
   (org-refile-targets
    '(("archive.org" :maxlevel . 1)))
+  (org-agenda-window-setup 'only-window)
   
   ;; Customs
   (org-agenda-custom-commands
@@ -254,10 +295,17 @@
 
   (org-capture-templates
    '(("t" "Todo" entry (file+headline "~/org/todo.org" "Inbox")
-      "* TODO %?")))
+      "* TODO %?")
+     ("l" "Literature Note" plain (file "~/org/tmp.org")
+      (file "100_Zotero/template.org"))
+     ("b" "TOREAD" entry (file "~/org/booklist.org")
+      "* TOREAD %?\n  :PROPERTIES:\n  :author:\n  :rate:\n  :genre:\n  :END:")))
 
   (org-preview-latex-default-process 'dvisvgm)
   (org-format-latex-options '(:scale 0.4))
+  (org-todo-keywords
+   '((sequence "TODO(t)" "|" "DONE(d!)")
+     (sequence "TOREAD" "READING" "|" "READ")))
 
   :config
   (advice-add 'org-refile :after 'org-save-all-org-buffers)
@@ -284,6 +332,18 @@
       (org-babel-tangle))))
 
 (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'mine/org-babel-tangle-config)))
+
+(defun org-to-clipboard ()
+  "Convert the contents of the current buffer or region from Org
+mode to HTML.   Store the result in the clipboard."
+  (interactive)
+  (if (use-region-p)
+      (shell-command-on-region (region-beginning)
+                               (region-end)
+                               "org2clip")
+      (shell-command-on-region (point-min)
+                               (point-max)
+                               "org2clip")))
 
 (use-package ledger-mode
   :init
@@ -340,6 +400,64 @@
 (use-package edwina
   :config
   (edwina-mode 1))
+
+(customize-set-variable 'display-buffer-base-action
+  '((display-buffer-reuse-window display-buffer-same-window)
+    (reusable-frames . t)))
+
+(customize-set-variable 'even-window-sizes nil)     ; avoid resizing
+
+(use-package popper
+  :ensure t
+  :bind (("C-`"   . popper-toggle)
+         ("M-`"   . popper-cycle)
+         ("C-M-`" . popper-toggle-type))
+  :init
+  (setq popper-reference-buffers
+        '("\\*Messages\\*"
+          "Output\\*$"
+          "\\*Async Shell Command\\*"
+          helpful-mode
+          eshell-mode
+          compilation-mode))
+  (popper-mode +1)
+  (popper-echo-mode +1))
+
+(use-package tabspaces
+  :hook (after-init . tabspaces-mode) ;; use this only if you want the minor-mode loaded at startup. 
+  :commands (tabspaces-switch-or-create-workspace
+             tabspaces-open-or-create-project-and-workspace)
+  :custom
+  (tabspaces-use-filtered-buffers-as-default t)
+  (tabspaces-default-tab "Default")
+  (tabspaces-remove-to-default t)
+  (tabspaces-include-buffers '("*scratch*"))
+  (tabspaces-initialize-project-with-todo t)
+  (tabspaces-todo-file-name "project-todo.org")
+  ;; sessions
+  (tabspaces-session t)
+  (tabspaces-session-auto-restore t)
+  (tab-bar-new-tab-choice "*scratch*")
+  :config
+  ;; Filter Buffers for Consult-Buffer
+  (with-eval-after-load 'consult
+    ;; hide full buffer list (still available with "b" prefix)
+    (consult-customize consult--source-buffer :hidden t :default nil)
+    ;; set consult-workspace buffer list
+    (defvar consult--source-workspace
+      (list :name     "Workspace Buffers"
+            :narrow   ?w
+            :history  'buffer-name-history
+            :category 'buffer
+            :state    #'consult--buffer-state
+            :default  t
+            :items    (lambda () (consult--buffer-query
+                                :predicate #'tabspaces--local-buffer-p
+                                :sort 'visibility
+                                :as #'buffer-name)))
+
+      "Set workspace buffer list for consult-buffer.")
+    (add-to-list 'consult-buffer-sources 'consult--source-workspace)))
 
 (use-package rime
   :custom
