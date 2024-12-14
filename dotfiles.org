@@ -1,0 +1,343 @@
+#+title: Dotfiles
+#+author: yxwang
+
+* Sway
+#+PROPERTY: header-args conf :tangle ./dotfiles/sway/config
+
+This configuration is modified from official sway config.
+
+** Variables
+
+Set mod key to Mod4 (logo key on most keyboards).
+
+#+begin_src conf
+  set $mod Mod4
+#+end_src
+
+Set home row direction keys, like vim.
+
+#+begin_src conf
+  set $left h
+  set $down j
+  set $up k
+  set $right l
+#+end_src
+
+Set prefered terminal emulator and application launcher.
+
+With Emacs installed, terminal emulator is only used when Emacs is not available, e.g. to restart Emacs server.
+
+I choose [[https://sw.kovidgoyal.net/kitty/][kitty]] because it supports wayland perfectly and is feature rich. And [[https://codeberg.org/dnkl/fuzzel][fuzzel]] because it is native to wayland and looks fine.
+
+#+begin_src conf
+  set $term kitty
+  # Note: pass the final command to swaymsg so that the resulting window can be opened
+  # on the original workspace that the command was run on.
+  set $menu "fuzzel | swaymsg"
+#+end_src
+
+** Startup
+
+Enable Xwayland.
+
+#+begin_src conf
+  xwayland enable
+#+end_src
+
+
+Source profile
+#+begin_src conf
+  # exec_always --no-startup-id bash -c "source ~/.profile"
+#+end_src
+
+** Output configuration
+
+*** Scale
+
+#+begin_src conf
+  output * scale 1.8
+#+end_src
+
+*** Wallpaper
+
+#+begin_src conf
+  output * bg /home/yxwang/Pictures/miki_240728_01.jpg fill
+#+end_src
+
+** Idle
+
+This will lock your screen after 300 seconds of inactivity, then turn off your displays after another 300 seconds, and turn your screens back on when resumed. It will also lock your screen before your computer goes to sleep.
+
+#+begin_src conf
+  exec swayidle -w \
+      timeout 300 'swaylock -f -c 000000' \
+      timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
+      before-sleep 'swaylock -f -c 000000'
+#+end_src
+
+** Input
+
+
+*** Touchpad
+
+#+begin_src conf
+  input "1267:12928:ELAN06FA:00_04F3:3280_Touchpad" {
+      dwt enabled
+      tap enabled
+      natural_scroll enabled
+      middle_emulation enabled
+  }
+#+end_src
+
+*** Keyboard
+
+#+begin_src conf
+  input "type:keyboard" {
+      xkb_layout us
+      xkb_numlock enabled
+      xkb_options "compose:ralt"
+  }
+#+end_src
+
+** Keybindings
+
+*** Basics
+
+#+begin_src conf
+  # Start a terminal
+  bindsym $mod+Return exec $term
+
+  # Kill focused window
+  bindsym $mod+q kill
+
+  # Start your launcher
+  bindsym $mod+d exec $menu
+
+  # Drag floating windows by holding down $mod and left mouse button.
+  # Resize them with right mouse button + $mod.
+  # Despite the name, also works for non-floating windows.
+  # Change normal to inverse to use left mouse button for resizing and right
+  # mouse button for dragging.
+  floating_modifier $mod normal
+
+  # Reload the configuration file
+  bindsym $mod+Shift+c reload
+
+  # Exit sway (logs you out of your Wayland session)
+  bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
+#+end_src
+
+*** Moving around
+
+#+begin_src conf
+  # Move your focus around
+  bindsym $mod+$left focus left
+  bindsym $mod+$down focus down
+  bindsym $mod+$up focus up
+  bindsym $mod+$right focus right
+
+  # Move the focused window with the same, but add Shift
+  bindsym $mod+Shift+$left move left
+  bindsym $mod+Shift+$down move down
+  bindsym $mod+Shift+$up move up
+  bindsym $mod+Shift+$right move right
+#+end_src
+
+*** Workspaces
+
+#+begin_src conf
+  # Switch to workspace
+  bindsym $mod+1 workspace number 1
+  bindsym $mod+2 workspace number 2
+  bindsym $mod+3 workspace number 3
+  bindsym $mod+4 workspace number 4
+  bindsym $mod+5 workspace number 5
+  bindsym $mod+6 workspace number 6
+  bindsym $mod+7 workspace number 7
+  bindsym $mod+8 workspace number 8
+  bindsym $mod+9 workspace number 9
+  bindsym $mod+0 workspace number 10
+  # Move focused container to workspace
+  bindsym $mod+Shift+1 move container to workspace number 1
+  bindsym $mod+Shift+2 move container to workspace number 2
+  bindsym $mod+Shift+3 move container to workspace number 3
+  bindsym $mod+Shift+4 move container to workspace number 4
+  bindsym $mod+Shift+5 move container to workspace number 5
+  bindsym $mod+Shift+6 move container to workspace number 6
+  bindsym $mod+Shift+7 move container to workspace number 7
+  bindsym $mod+Shift+8 move container to workspace number 8
+  bindsym $mod+Shift+9 move container to workspace number 9
+  bindsym $mod+Shift+0 move container to workspace number 10
+#+end_src
+
+Note: workspaces can have any name you want, not just numbers. We just use 1-10 as the default.
+
+*** Layout
+
+#+begin_src conf
+  # You can "split" the current object of your focus with
+  # $mod+b or $mod+v, for horizontal and vertical splits
+  # respectively.
+  bindsym $mod+b splith
+  bindsym $mod+v splitv
+
+  # Switch the current container between different layout styles
+  bindsym $mod+s layout stacking
+  bindsym $mod+w layout tabbed
+  bindsym $mod+e layout toggle split
+
+  # Make the current focus fullscreen
+  bindsym $mod+f fullscreen
+
+  # Toggle the current focus between tiling and floating mode
+  bindsym $mod+Shift+space floating toggle
+
+  # Swap focus between the tiling area and the floating area
+  bindsym $mod+space focus mode_toggle
+
+  # Move focus to the parent container
+  bindsym $mod+a focus parent
+#+end_src
+
+*** Scrachpad
+
+Sway has a "scratchpad", which is a bag of holding for windows. You can send windows there and get them back later.
+
+#+begin_src conf
+  # Move the currently focused window to the scratchpad
+  bindsym $mod+Shift+minus move scratchpad
+
+  # Show the next scratchpad window or hide the focused scratchpad window.
+  # If there are multiple scratchpad windows, this command cycles through them.
+  bindsym $mod+minus scratchpad show
+#+end_src
+
+*** Resizing
+
+#+begin_src conf
+  mode "resize" {
+      # left will shrink the containers width
+      # right will grow the containers width
+      # up will shrink the containers height
+      # down will grow the containers height
+      bindsym $left resize shrink width 10px
+      bindsym $down resize grow height 10px
+      bindsym $up resize shrink height 10px
+      bindsym $right resize grow width 10px
+
+      # Return to default mode
+      bindsym Return mode "default"
+      bindsym Escape mode "default"
+  }
+  bindsym $mod+r mode "resize"
+#+end_src
+
+*** Audio
+
+#+begin_src conf
+  set $refresh_i3status killall -SIGUSR1 i3status
+  bindsym XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +5% && $refresh_i3status
+  bindsym XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -5% && $refresh_i3status
+  bindsym XF86AudioMute exec pactl set-sink-mute @DEFAULT_SINK@ toggle && $refresh_i3status
+  bindsym XF86AudioMicMute exec pactl set-source-mute @DEFAULT_SOURCE@ toggle && $refresh_i3status
+#+end_src
+
+*** Brightness
+
+#+begin_src conf
+  bindsym XF86MonBrightnessUp exec brightnessctl set +5%
+  bindsym XF86MonBrightnessDown exec brightnessctl set 5%-
+  exec brightnessctl set 25%
+#+end_src
+
+*** Pick color
+
+#+begin_src conf
+  bindsym $mod+Shift+p exec grim -g "$(slurp -p)" -t ppm - | convert - -format '%[pixel:p{0,0}]' txt:- | tail -n 1 | cut -d ' ' -f 4 | wl-copy
+#+end_src
+
+*** Screenshot
+
+#+begin_src conf
+  bindsym Print exec grim
+  bindsym $mod+Print exec grim -g "$(slurp)"
+#+end_src
+
+** Prevent GTK apps frozen
+
+This is a small trick to prevent GTK apps from frozen. Sources are not clear.
+
+#+begin_src conf
+  exec dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK
+  exec systemctl --user import-environment
+#+end_src
+
+** Status Bar
+
+#+begin_src conf
+  bar {
+      swaybar_command waybar
+  }
+#+end_src
+
+** Assign to workspace
+
+#+begin_src emacs-lisp
+  assign [app_id="Firefox-esr"] workspace number 2
+  assign [app_id="Zotero"] workspace number 3
+  assign [app_id="nemo"] workspace number 4
+  assign [app_id="mpv"] workspace number 6
+  assign [app_id="gnucash"] workspace number 9
+  assign [app_id="clash-verge"] workspace number 10
+  assign [class="[cC]lash-[vV]erge"] workspace number 10
+  assign [app_id="org.qbittorrent.qBittorrent"] workspace number 10
+  assign [class="[eE]asy[cC]onnect"] workspace number 10
+#+end_src
+
+** Floating
+
+#+begin_src conf
+  for_window [class="[mM]atplotlib"] floating enable
+#+end_src
+
+** Appearence
+
+#+begin_src conf
+  gaps inner 2
+  smart_gaps on
+
+  default_border pixel 2
+  smart_borders on
+  default_floating_border normal 3
+
+  # theme
+  set $bg #ffffff
+  set $fg #000000
+  set $fbg #b4e04b
+  set $ffg #7d9c34
+  # Property Name             Border  BG      Text    Indicator Child-border
+  client.focused              $fbg    $bg     $ffg    $fbg      $fbg
+  client.focused_inactive     $bg     $bg     $fg     $bg       $bg
+  client.unfocused            $bg     $bg     $fg     $bg       $bg
+  client.urgent               $bg     $bg     $fg     $bg       $bg
+  client.placeholder          $bg     $bg     $fg     $bg       $bg
+
+#+end_src
+
+** Autostart
+
+#+begin_src conf
+  exec clash-verge
+  exec dunst
+  exec fcitx5
+  exec qbittorrent
+  exec zotero
+  exec suwayomi-server
+#+end_src
+
+** Include subdirectory configure
+
+#+begin_src conf
+  include @sysconfdir@/sway/config.d/*
+#+end_src
+
