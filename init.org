@@ -33,16 +33,15 @@ Also, we should remove startup message.
 
 ** Font Settings
 
-I use JetBrains Mono Font without ligatures for codes.
-For CJK fonts, I use Noto Sans.
+Use Sarasa Font.
 
 #+begin_src emacs-lisp
   (defun mine/font-settings ()
-    (set-face-attribute 'default nil :font "JetBrainsMonoNL Nerd Font Propo")
-    (set-face-attribute 'variable-pitch nil :font "Noto Sans CJK SC")
-    (set-fontset-font t 'han "Noto Sans CJK SC")
-    (set-fontset-font t 'kana "Noto Sans CJK JP")
-    (set-fontset-font t 'cjk-misc "Noto Sans CJK JP"))
+    (set-face-attribute 'default nil :font "Sarasa Fixed CL")
+    (set-face-attribute 'variable-pitch nil :font "Sarasa Fixed CL")
+    (set-fontset-font t 'han "Sarasa Fixed CL")
+    (set-fontset-font t 'kana "Sarasa Fixed CL")
+    (set-fontset-font t 'cjk-misc "Sarasa Fixed CL"))
 
   (add-hook 'server-after-make-frame-hook #'mine/font-settings) ;; For client mode
   (mine/font-settings) ;; For GUI mode
@@ -445,7 +444,7 @@ Use projectile for project management. (Rarely used)
 #+begin_src emacs-lisp
   (use-package eldoc-box
     :config
-    (set-face-attribute 'eldoc-box-body nil :font "Roboto Medium")
+    (set-face-attribute 'eldoc-box-body nil :font "Sarasa UI CL")
     :hook
     (eglot-managed-mode . eldoc-box-hover-mode))
 #+end_src
@@ -528,7 +527,7 @@ Main org-mode config. Using noweb for sake of simplicity.
 #+end_src
 
 #+RESULTS:
-: #s(hash-table size 65 test eql rehash-size 1.5 rehash-threshold 0.8125 data (:use-package (26456 15274 158126 898000) :init (26456 15274 158123 201000) :init-secs (0 0 174 698000) :use-package-secs (0 0 704 431000) :config (26456 15274 158105 7000) :config-secs (0 0 135 915000)))
+: #s(hash-table size 65 test eql rehash-size 1.5 rehash-threshold 0.8125 data (:use-package (26477 23255 137563 30000) :init (26477 23255 137559 583000) :init-secs (0 0 66 665000) :use-package-secs (0 0 147 648000) :config (26477 23255 137549 304000) :config-secs (0 0 36 529000)))
 
 ** Auto tangle config
 
@@ -585,7 +584,7 @@ Config org-babel-tangle to auto export files in =.emacs.d=.
      ("l" "Literature Note" plain (file "~/org/tmp.org")
       (file "100_Zotero/template.org"))
      ("b" "TOREAD" entry (file "~/org/booklist.org")
-      "* TOREAD %?\n  :PROPERTIES:\n  :author:\n  :rate:\n  :genre:\n  :END:")))
+      "* TOREAD %?\n:PROPERTIES:\n:author:\n:rate:\n:END:")))
 #+end_src
 
 ** Habit
@@ -817,9 +816,9 @@ Use emacs-rime for Chinese input.
     :custom
     (default-input-method "rime")
     (rime-show-candidate 'posframe)
-    (rime-posframe-style 'vertical)
+    (rime-posframe-style 'horizonal)
     (rime-posframe-properties (list :internal-border-width 10
-  				  :font "Noto Sans CJK SC Bold")))
+  				  :font "Sarasa UI CL Medium")))
 #+end_src
 
 * Profiling

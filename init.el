@@ -11,11 +11,11 @@
 (setq inhibit-startup-message t)
 
 (defun mine/font-settings ()
-  (set-face-attribute 'default nil :font "JetBrainsMonoNL Nerd Font Propo")
-  (set-face-attribute 'variable-pitch nil :font "Noto Sans CJK SC")
-  (set-fontset-font t 'han "Noto Sans CJK SC")
-  (set-fontset-font t 'kana "Noto Sans CJK JP")
-  (set-fontset-font t 'cjk-misc "Noto Sans CJK JP"))
+  (set-face-attribute 'default nil :font "Sarasa Fixed CL")
+  (set-face-attribute 'variable-pitch nil :font "Sarasa Fixed CL")
+  (set-fontset-font t 'han "Sarasa Fixed CL")
+  (set-fontset-font t 'kana "Sarasa Fixed CL")
+  (set-fontset-font t 'cjk-misc "Sarasa Fixed CL"))
 
 (add-hook 'server-after-make-frame-hook #'mine/font-settings) ;; For client mode
 (mine/font-settings) ;; For GUI mode
@@ -244,7 +244,7 @@
 
 (use-package eldoc-box
   :config
-  (set-face-attribute 'eldoc-box-body nil :font "Roboto Medium")
+  (set-face-attribute 'eldoc-box-body nil :font "Sarasa UI CL")
   :hook
   (eglot-managed-mode . eldoc-box-hover-mode))
 
@@ -299,7 +299,7 @@
      ("l" "Literature Note" plain (file "~/org/tmp.org")
       (file "100_Zotero/template.org"))
      ("b" "TOREAD" entry (file "~/org/booklist.org")
-      "* TOREAD %?\n  :PROPERTIES:\n  :author:\n  :rate:\n  :genre:\n  :END:")))
+      "* TOREAD %?\n:PROPERTIES:\n:author:\n:rate:\n:END:")))
 
   (org-preview-latex-default-process 'dvisvgm)
   (org-format-latex-options '(:scale 0.4))
@@ -463,9 +463,9 @@ mode to HTML.   Store the result in the clipboard."
   :custom
   (default-input-method "rime")
   (rime-show-candidate 'posframe)
-  (rime-posframe-style 'vertical)
+  (rime-posframe-style 'horizonal)
   (rime-posframe-properties (list :internal-border-width 10
-				  :font "Noto Sans CJK SC Bold")))
+				  :font "Sarasa UI CL Medium")))
 
 (defun mine/display-startup-time ()
   (message "Emacs loaded in %s with %d garbage collections."
