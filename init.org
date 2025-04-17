@@ -758,11 +758,13 @@ Small trick to prevent buffers from poppling everywhere:
 (customize-set-variable 'even-window-sizes nil)     ; avoid resizing
 #+end_src
 
+#+RESULTS:
+
 ** Popper
 
 [[https://github.com/karthink/popper][Popper]] provides popup windows for Emacs, which is handy for buffers you need immediately and want them disappear immediately.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   (use-package popper
     :ensure t
     :bind (("C-`"   . popper-toggle)
