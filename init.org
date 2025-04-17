@@ -36,15 +36,16 @@ Also, we should remove startup message.
 Use Sarasa Font.
 
 #+begin_src emacs-lisp
-  (defun mine/font-settings ()
-    (set-face-attribute 'default nil :font "Sarasa Fixed CL")
-    (set-face-attribute 'variable-pitch nil :font "Sarasa Fixed CL")
-    (set-fontset-font t 'han "Sarasa Fixed CL")
-    (set-fontset-font t 'kana "Sarasa Fixed CL")
-    (set-fontset-font t 'cjk-misc "Sarasa Fixed CL"))
+    (defun mine/font-settings ()
+      (set-face-attribute 'default nil :font "monospace")
+      (set-face-attribute 'variable-pitch nil :font "sans")
+      (set-fontset-font t 'han "monospace")
+      (set-fontset-font t 'kana "monospace")
+      (set-fontset-font t 'cjk-misc "monospace")
+      (set-fontset-font t 'symbol "monospace"))
 
-  (add-hook 'server-after-make-frame-hook #'mine/font-settings) ;; For client mode
-  (mine/font-settings) ;; For GUI mode
+    (add-hook 'server-after-make-frame-hook #'mine/font-settings) ;; For client mode
+    (mine/font-settings) ;; For GUI mode
 #+end_src
 
 ** Background Transparency
@@ -108,7 +109,7 @@ Use =use-package= for package management.
 #+begin_src emacs-lisp
   (use-package auto-package-update
     :custom
-    (auto-package-update-interval 7)
+    (auto-package-update-interval 30)
     (auto-package-update-prompt-before-update t)
     (auto-package-update-hide-results nil)
     :config
@@ -502,7 +503,7 @@ Org-mode hook
 
 Main org-mode config. Using noweb for sake of simplicity.
 
-#+begin_src emacs-lisp :noweb yes
+#+begin_src emacs-lisp :noweb yes :tangle yes
   (use-package org
     :hook (org-mode . mine/org-mode-setup)
     :custom
@@ -526,14 +527,11 @@ Main org-mode config. Using noweb for sake of simplicity.
     <<Org Babel>>)
 #+end_src
 
-#+RESULTS:
-: #s(hash-table size 65 test eql rehash-size 1.5 rehash-threshold 0.8125 data (:use-package (26477 23255 137563 30000) :init (26477 23255 137559 583000) :init-secs (0 0 66 665000) :use-package-secs (0 0 147 648000) :config (26477 23255 137549 304000) :config-secs (0 0 36 529000)))
-
 ** Auto tangle config
 
 Config org-babel-tangle to auto export files in =.emacs.d=.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
   (defun mine/org-babel-tangle-config ()
     (when (file-equal-p (file-name-directory (buffer-file-name))
   		      (expand-file-name "~/.emacs.d"))
@@ -634,7 +632,8 @@ Ledger mode is for ledger, a plain text accounting tool.
     (add-to-list 'evil-emacs-state-modes 'ledger-report-mode)
     :custom
     (ledger-reports
-     '(("bal" "%(binary) -f ~/org/PTA/keep.ledger bal")))
+     '(("bal" "%(binary) --strict -f ~/org/PTA/keep.ledger bal")))
+    (ledger-accounts-file "~/org/PTA/accounts.ledger")
     :mode "\\.ledger\\'")
 #+end_src
 
@@ -804,6 +803,9 @@ Tabspace is a convenient wrapper for =tab-bar.el= and =project.el=
       (add-to-list 'consult-buffer-sources 'consult--source-workspace)))
 
 #+end_src
+
+#+RESULTS:
+: #s(hash-table size 65 test eql rehash-size 1.5 rehash-threshold 0.8125 data (:use-package (26599 21901 20520 252000) :init (26599 21901 20512 166000) :init-secs (0 0 27 313000) :use-package-secs (0 0 87 912000)))
 
 * Input Methond
 

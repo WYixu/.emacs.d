@@ -77,7 +77,6 @@ This will lock your screen after 300 seconds of inactivity, then turn off your d
 
 ** Input
 
-
 *** Touchpad
 
 #+begin_src conf
@@ -331,8 +330,6 @@ This is a small trick to prevent GTK apps from frozen. Sources are not clear.
   exec dunst
   exec fcitx5
   exec qbittorrent
-  exec zotero
-  exec suwayomi-server
 #+end_src
 
 ** Include subdirectory configure

@@ -11,11 +11,12 @@
 (setq inhibit-startup-message t)
 
 (defun mine/font-settings ()
-  (set-face-attribute 'default nil :font "Sarasa Fixed CL")
-  (set-face-attribute 'variable-pitch nil :font "Sarasa Fixed CL")
-  (set-fontset-font t 'han "Sarasa Fixed CL")
-  (set-fontset-font t 'kana "Sarasa Fixed CL")
-  (set-fontset-font t 'cjk-misc "Sarasa Fixed CL"))
+  (set-face-attribute 'default nil :font "monospace")
+  (set-face-attribute 'variable-pitch nil :font "sans")
+  (set-fontset-font t 'han "monospace")
+  (set-fontset-font t 'kana "monospace")
+  (set-fontset-font t 'cjk-misc "monospace")
+  (set-fontset-font t 'symbol "monospace"))
 
 (add-hook 'server-after-make-frame-hook #'mine/font-settings) ;; For client mode
 (mine/font-settings) ;; For GUI mode
@@ -52,7 +53,7 @@
 
 (use-package auto-package-update
   :custom
-  (auto-package-update-interval 7)
+  (auto-package-update-interval 30)
   (auto-package-update-prompt-before-update t)
   (auto-package-update-hide-results nil)
   :config
@@ -219,6 +220,18 @@
 
 (use-package rust-mode)
 
+(use-package geiser)
+
+(use-package geiser-guile
+  :after geiser
+  :custom
+  (geiser-active-implementations '(guile))
+  (geiser-guile-binary "/usr/bin/guile")
+  (geiser-repl-autodoc-p t))
+
+(use-package paredit
+  :hook (scheme-mode . paredit-mode))
+
 ;; (use-package flycheck
 ;;   :ensure t
 ;;   :init
@@ -352,7 +365,8 @@ mode to HTML.   Store the result in the clipboard."
   (add-to-list 'evil-emacs-state-modes 'ledger-report-mode)
   :custom
   (ledger-reports
-   '(("bal" "%(binary) -f ~/org/PTA/keep.ledger bal")))
+   '(("bal" "%(binary) --strict -f ~/org/PTA/keep.ledger bal")))
+  (ledger-accounts-file "~/org/PTA/accounts.ledger")
   :mode "\\.ledger\\'")
 
 (use-package vterm
@@ -406,22 +420,6 @@ mode to HTML.   Store the result in the clipboard."
     (reusable-frames . t)))
 
 (customize-set-variable 'even-window-sizes nil)     ; avoid resizing
-
-(use-package popper
-  :ensure t
-  :bind (("C-`"   . popper-toggle)
-         ("M-`"   . popper-cycle)
-         ("C-M-`" . popper-toggle-type))
-  :init
-  (setq popper-reference-buffers
-        '("\\*Messages\\*"
-          "Output\\*$"
-          "\\*Async Shell Command\\*"
-          helpful-mode
-          eshell-mode
-          compilation-mode))
-  (popper-mode +1)
-  (popper-echo-mode +1))
 
 (use-package tabspaces
   :hook (after-init . tabspaces-mode) ;; use this only if you want the minor-mode loaded at startup. 
