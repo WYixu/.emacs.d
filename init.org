@@ -393,6 +393,25 @@ Load venv.
   (use-package rust-mode)
 #+end_src
 
+*** Scheme
+
+#+begin_src emacs-lisp
+  (use-package geiser)
+
+  (use-package geiser-guile
+    :after geiser
+    :custom
+    (geiser-active-implementations '(guile))
+    (geiser-guile-binary "/usr/bin/guile")
+    (geiser-repl-autodoc-p t))
+
+  (use-package paredit
+    :hook (scheme-mode . paredit-mode))
+#+end_src
+
+#+RESULTS:
+: #s(hash-table size 65 test eql rehash-size 1.5 rehash-threshold 0.8125 data (:use-package (26606 36645 452935 337000) :init (26606 36645 452932 331000) :config (26606 36645 452920 559000) :config-secs (0 0 3 577000) :init-secs (0 0 555534 615000) :use-package-secs (0 0 555684 40000)))
+
 ** Flycheck
 
 Use flycheck to handle diagnostics.
