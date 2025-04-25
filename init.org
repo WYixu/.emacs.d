@@ -109,7 +109,7 @@ Use =use-package= for package management.
 #+begin_src emacs-lisp
   (use-package auto-package-update
     :custom
-    (auto-package-update-interval 30)
+    (auto-package-update-interval 7)
     (auto-package-update-prompt-before-update t)
     (auto-package-update-hide-results nil)
     :config
@@ -251,7 +251,9 @@ Use general to get vim style leader key keybindings.
 
       "t" '(:ignore t :which-key "toggles")
       "tt" '(consult-theme
-             :which-key "choose-theme")))
+             :which-key "choose-theme")
+
+      "x" '(:keymap perspective-map :package perspective)))
 #+end_src
 
 * Completion
@@ -298,16 +300,16 @@ Orderless is for the fuzzy completion.
 [[https://github.com/minad/marginalia][Marginalia]] is for more detailed description for consult and vanilla minibuffer switchers.
 
 #+begin_src emacs-lisp
-  (use-package marginalia
-    :init
-    (marginalia-mode 1))
+  ; (use-package marginalia
+   ; :init
+   ; (marginalia-mode 1))
 #+end_src
 
 ** Corfu
 
 [[https://github.com/minad/corfu][Corfu]] is a in-buffer completion.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
   (use-package corfu
     :hook
     (prog-mode . corfu-mode)
@@ -793,16 +795,17 @@ Small trick to prevent buffers from poppling everywhere:
     :bind
     ("C-x C-b" . persp-list-buffers)
     :custom
-    (persp-mode-prefix-key (kbd "C-x x"))
     (persp-state-default-file (expand-file-name "persp-state" user-emacs-directory))
+    (persp-suppress-no-prefix-key-warning t)
     :init
     (persp-mode)
     :config
     (add-hook 'kill-emacs-hook #'persp-state-save)
     (add-hook 'after-init-hook
               (lambda () (persp-state-load persp-state-default-file)))
-    (consult-customize consult--source-buffer :hidden t :default nil)
-    (add-to-list 'consult-buffer-sources persp-consult-source))
+    (with-eval-after-load 'consult
+      (consult-customize consult--source-buffer :hidden t :default nil)
+      (add-to-list 'consult-buffer-sources persp-consult-source)))
 #+end_src
 
 ** Tabspace

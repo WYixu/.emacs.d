@@ -53,7 +53,7 @@
 
 (use-package auto-package-update
   :custom
-  (auto-package-update-interval 30)
+  (auto-package-update-interval 7)
   (auto-package-update-prompt-before-update t)
   (auto-package-update-hide-results nil)
   :config
@@ -145,7 +145,9 @@
 
     "t" '(:ignore t :which-key "toggles")
     "tt" '(consult-theme
-           :which-key "choose-theme")))
+           :which-key "choose-theme")
+
+    "x" '(:keymap perspective-map :package perspective)))
 
 (use-package vertico
   :diminish
@@ -170,9 +172,9 @@
 	 ("M-p" . consult-project-buffer)
          ("C-s" . consult-line)))
 
-(use-package marginalia
-  :init
-  (marginalia-mode 1))
+; (use-package marginalia
+ ; :init
+ ; (marginalia-mode 1))
 
 (use-package corfu
   :hook
@@ -425,16 +427,17 @@ mode to HTML.   Store the result in the clipboard."
   :bind
   ("C-x C-b" . persp-list-buffers)
   :custom
-  (persp-mode-prefix-key (kbd "C-x x"))
   (persp-state-default-file (expand-file-name "persp-state" user-emacs-directory))
+  (persp-suppress-no-prefix-key-warning t)
   :init
   (persp-mode)
   :config
   (add-hook 'kill-emacs-hook #'persp-state-save)
   (add-hook 'after-init-hook
             (lambda () (persp-state-load persp-state-default-file)))
-  (consult-customize consult--source-buffer :hidden t :default nil)
-  (add-to-list 'consult-buffer-sources persp-consult-source))
+  (with-eval-after-load 'consult
+    (consult-customize consult--source-buffer :hidden t :default nil)
+    (add-to-list 'consult-buffer-sources persp-consult-source)))
 
 (use-package rime
   :custom
