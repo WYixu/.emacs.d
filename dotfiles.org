@@ -297,6 +297,7 @@ This is a small trick to prevent GTK apps from frozen. Sources are not clear.
 
 #+begin_src conf
   for_window [class="[mM]atplotlib"] floating enable
+  for_window [app_id="python3"] floating enable
 #+end_src
 
 ** Appearence
