@@ -300,9 +300,9 @@ Orderless is for the fuzzy completion.
 [[https://github.com/minad/marginalia][Marginalia]] is for more detailed description for consult and vanilla minibuffer switchers.
 
 #+begin_src emacs-lisp
-  ; (use-package marginalia
-   ; :init
-   ; (marginalia-mode 1))
+  (use-package marginalia
+   :init
+   (marginalia-mode 1))
 #+end_src
 
 ** Corfu

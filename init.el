@@ -172,9 +172,9 @@
 	 ("M-p" . consult-project-buffer)
          ("C-s" . consult-line)))
 
-; (use-package marginalia
- ; :init
- ; (marginalia-mode 1))
+(use-package marginalia
+ :init
+ (marginalia-mode 1))
 
 (use-package corfu
   :hook
