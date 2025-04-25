@@ -423,6 +423,21 @@ mode to HTML.   Store the result in the clipboard."
 
 (customize-set-variable 'even-window-sizes nil)     ; avoid resizing
 
+(use-package popper
+  :ensure t
+  :bind (("C-`"   . popper-toggle)
+         ("M-`"   . popper-cycle)
+         ("C-M-`" . popper-toggle-type))
+  :init
+  (setq popper-reference-buffers
+        '("\\*Messages\\*"
+          "\\*Async Shell Command\\*"
+          helpful-mode
+          eshell-mode
+          compilation-mode))
+  (popper-mode +1)
+  (popper-echo-mode +1))
+
 (use-package perspective
   :bind
   ("C-x C-b" . persp-list-buffers)

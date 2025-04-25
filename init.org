@@ -766,7 +766,7 @@ Small trick to prevent buffers from poppling everywhere:
 
 [[https://github.com/karthink/popper][Popper]] provides popup windows for Emacs, which is handy for buffers you need immediately and want them disappear immediately.
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
   (use-package popper
     :ensure t
     :bind (("C-`"   . popper-toggle)
@@ -775,7 +775,6 @@ Small trick to prevent buffers from poppling everywhere:
     :init
     (setq popper-reference-buffers
           '("\\*Messages\\*"
-            "Output\\*$"
             "\\*Async Shell Command\\*"
             helpful-mode
             eshell-mode
