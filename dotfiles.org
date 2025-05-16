@@ -64,6 +64,12 @@ Source profile
   output * bg /home/yxwang/Pictures/miki_240728_01.jpg fill
 #+end_src
 
+*** HDR
+
+#+begin_src conf
+  #output eDP-1 hdr enable
+#+end_src
+
 ** Idle
 
 This will lock your screen after 300 seconds of inactivity, then turn off your displays after another 300 seconds, and turn your screens back on when resumed. It will also lock your screen before your computer goes to sleep.
@@ -283,6 +289,8 @@ This is a small trick to prevent GTK apps from frozen. Sources are not clear.
 
 #+begin_src emacs-lisp
   assign [app_id="Firefox-esr"] workspace number 2
+  assign [app_id="org.mozilla.firefox"] workspace number 2
+  assign [app_id="net.ankiweb.Anki"] workspace number 3
   assign [app_id="Zotero"] workspace number 3
   assign [app_id="nemo"] workspace number 4
   assign [app_id="mpv"] workspace number 6
@@ -331,6 +339,10 @@ This is a small trick to prevent GTK apps from frozen. Sources are not clear.
   exec dunst
   exec fcitx5
   exec qbittorrent
+  exec emacs
+  exec flatpak run org.mozilla.firefox
+  exec flatpak run net.ankiweb.Anki
+  exec flatpak run org.zotero.Zotero
 #+end_src
 
 ** Include subdirectory configure
