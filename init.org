@@ -191,7 +191,7 @@ Map =<escape>= to the same function as =<C-g>=. A good habit from vim.
 
 Use Evil mode to bring back beloved vim editing experience.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   (use-package evil
     :init
     (setq evil-want-integration t)
@@ -207,7 +207,7 @@ Use Evil mode to bring back beloved vim editing experience.
 
 Use evil collection for most mode compatibility.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   (use-package evil-collection
     :after evil
     :config
@@ -218,7 +218,7 @@ Use evil collection for most mode compatibility.
 
 Use general to get vim style leader key keybindings.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   (use-package general
     :config
     (general-evil-setup t)
@@ -254,6 +254,107 @@ Use general to get vim style leader key keybindings.
              :which-key "choose-theme")
 
       "x" '(:keymap perspective-map :package perspective)))
+#+end_src
+
+** Meow
+
+[[https://github.com/meow-edit/meow][Meow]] is a modal editing mode for Emacs.
+
+Setup the QWERTY layout.
+
+#+begin_src emacs-lisp
+(defun meow-setup ()
+  (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
+  (meow-motion-define-key
+   '("j" . meow-next)
+   '("k" . meow-prev)
+   '("<escape>" . ignore))
+  (meow-leader-define-key
+   ;; Use SPC (0-9) for digit arguments.
+   '("1" . meow-digit-argument)
+   '("2" . meow-digit-argument)
+   '("3" . meow-digit-argument)
+   '("4" . meow-digit-argument)
+   '("5" . meow-digit-argument)
+   '("6" . meow-digit-argument)
+   '("7" . meow-digit-argument)
+   '("8" . meow-digit-argument)
+   '("9" . meow-digit-argument)
+   '("0" . meow-digit-argument)
+   '("/" . meow-keypad-describe-key)
+   '("?" . meow-cheatsheet))
+  (meow-normal-define-key
+   '("0" . meow-expand-0)
+   '("9" . meow-expand-9)
+   '("8" . meow-expand-8)
+   '("7" . meow-expand-7)
+   '("6" . meow-expand-6)
+   '("5" . meow-expand-5)
+   '("4" . meow-expand-4)
+   '("3" . meow-expand-3)
+   '("2" . meow-expand-2)
+   '("1" . meow-expand-1)
+   '("-" . negative-argument)
+   '(";" . meow-reverse)
+   '("," . meow-inner-of-thing)
+   '("." . meow-bounds-of-thing)
+   '("[" . meow-beginning-of-thing)
+   '("]" . meow-end-of-thing)
+   '("a" . meow-append)
+   '("A" . meow-open-below)
+   '("b" . meow-back-word)
+   '("B" . meow-back-symbol)
+   '("c" . meow-change)
+   '("d" . meow-delete)
+   '("D" . meow-backward-delete)
+   '("e" . meow-next-word)
+   '("E" . meow-next-symbol)
+   '("f" . meow-find)
+   '("g" . meow-cancel-selection)
+   '("G" . meow-grab)
+   '("h" . meow-left)
+   '("H" . meow-left-expand)
+   '("i" . meow-insert)
+   '("I" . meow-open-above)
+   '("j" . meow-next)
+   '("J" . meow-next-expand)
+   '("k" . meow-prev)
+   '("K" . meow-prev-expand)
+   '("l" . meow-right)
+   '("L" . meow-right-expand)
+   '("m" . meow-join)
+   '("n" . meow-search)
+   '("o" . meow-block)
+   '("O" . meow-to-block)
+   '("p" . meow-yank)
+   '("q" . meow-quit)
+   '("Q" . meow-goto-line)
+   '("r" . meow-replace)
+   '("R" . meow-swap-grab)
+   '("s" . meow-kill)
+   '("t" . meow-till)
+   '("u" . meow-undo)
+   '("U" . meow-undo-in-selection)
+   '("v" . meow-visit)
+   '("w" . meow-mark-word)
+   '("W" . meow-mark-symbol)
+   '("x" . meow-line)
+   '("X" . meow-goto-line)
+   '("y" . meow-save)
+   '("Y" . meow-sync-grab)
+   '("z" . meow-pop-selection)
+   '("'" . repeat)
+   '("<escape>" . ignore)))
+#+end_src
+
+Load Meow.
+
+#+begin_src emacs-lisp
+    (use-package meow
+      :config
+      (meow-setup)
+      (meow-global-mode 1)
+      (meow-leader-define-key '("p" . "C-c M-p")))
 #+end_src
 
 * Completion
@@ -518,7 +619,7 @@ Org-mode hook
     (org-indent-mode)
     (auto-fill-mode 0)
     (display-line-numbers-mode 0)
-    (setq evil-auto-intent nil)
+    ;; (setq evil-auto-intent nil)
     (setq word-wrap-by-category t))
 #+end_src
 
@@ -690,10 +791,12 @@ Dired is the default file management utility for emacs and it works well in most
     :custom 
     (dired-kill-when-opening-new-dired-buffer t)
     (dired-listing-switches "-agho --group-directories-first")
-    :config
-    (evil-collection-define-key 'normal 'dired-mode-map
-      "h" 'dired-up-directory
-      "l" 'dired-find-file))
+    )
+  ;;    :config
+  ;; (evil-collection-define-key 'normal 'dired-mode-map
+  ;;      ;;"h" 'dired-up-directory
+  ;; "l" 'dired-find-file))
+
 #+end_src
 
 *** Icons
@@ -795,7 +898,7 @@ Small trick to prevent buffers from poppling everywhere:
     ("C-x C-b" . persp-list-buffers)
     :custom
     (persp-state-default-file (expand-file-name "persp-state" user-emacs-directory))
-    (persp-suppress-no-prefix-key-warning t)
+    (persp-mode-prefix-key (kbd "C-c M-p"))  ; pick your own prefix key here
     :init
     (persp-mode)
     :config
