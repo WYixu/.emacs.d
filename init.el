@@ -274,6 +274,15 @@
 (use-package paredit
   :hook (scheme-mode . paredit-mode))
 
+(use-package tex
+  :ensure auctex
+  :custom
+  (TeX-auto-save t)
+  (TeX-parse-self t)
+  :config
+  (setq-default TeX-master nil)
+  )
+
 ;; (use-package flycheck
 ;;   :ensure t
 ;;   :init
@@ -289,13 +298,6 @@
   :commands (magit-status)
   :custom
   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
-
-(use-package projectile
-  :diminish projectile-mode
-  :config (projectile-mode)
-  :custom ((projectile-completion-system 'ivy))
-  :bind-keymap
-  ("C-c p" . projectile-command-map))
 
 (use-package eldoc-box
   :config
@@ -452,7 +454,7 @@ mode to HTML.   Store the result in the clipboard."
   (visual-line-mode))
 (use-package visual-fill-column
   :defer t
-  :hook ((org-mode latex-mode) . mine/visual-fill-setup))
+  :hook ((org-mode LaTeX-mode) . mine/visual-fill-setup))
 
 (use-package edwina
   :config
