@@ -519,6 +519,19 @@ Load venv.
 #+RESULTS:
 : #s(hash-table size 65 test eql rehash-size 1.5 rehash-threshold 0.8125 data (:use-package (26606 36645 452935 337000) :init (26606 36645 452932 331000) :config (26606 36645 452920 559000) :config-secs (0 0 3 577000) :init-secs (0 0 555534 615000) :use-package-secs (0 0 555684 40000)))
 
+*** TeX
+
+#+begin_src emacs-lisp
+  (use-package tex
+    :ensure auctex
+    :custom
+    (TeX-auto-save t)
+    (TeX-parse-self t)
+    :config
+    (setq-default TeX-master nil)
+    )
+#+end_src
+
 ** Flycheck
 
 Use flycheck to handle diagnostics.
@@ -557,7 +570,7 @@ Magit is a magical git interface for Emacs.
 
 Use projectile for project management. (Rarely used)
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   (use-package projectile
     :diminish projectile-mode
     :config (projectile-mode)
@@ -844,7 +857,7 @@ Visual-fill-column is used for display org-mode and latex-mode contents in the m
     (visual-line-mode))
   (use-package visual-fill-column
     :defer t
-    :hook ((org-mode latex-mode) . mine/visual-fill-setup))
+    :hook ((org-mode LaTeX-mode) . mine/visual-fill-setup))
 #+end_src
 
 ** Split Settings
