@@ -350,11 +350,15 @@ Setup the QWERTY layout.
 Load Meow.
 
 #+begin_src emacs-lisp
-    (use-package meow
-      :config
-      (meow-setup)
-      (meow-global-mode 1)
-      (meow-leader-define-key '("p" . "C-c M-p")))
+  (use-package meow
+    :config
+    (meow-setup)
+    (meow-global-mode 1)
+    (meow-leader-define-key
+     '("p" . "C-c M-p")
+     '("l" . "C-c C-o"))
+    :custom
+    (meow-use-clipboard t))
 #+end_src
 
 * Completion

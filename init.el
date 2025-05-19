@@ -183,7 +183,11 @@
   :config
   (meow-setup)
   (meow-global-mode 1)
-  (meow-leader-define-key '("p" . "C-c M-p")))
+  (meow-leader-define-key
+   '("p" . "C-c M-p")
+   '("l" . "C-c C-o"))
+  :custom
+  (meow-use-clipboard t))
 
 (use-package vertico
   :diminish
