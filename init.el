@@ -21,15 +21,10 @@
 (add-hook 'server-after-make-frame-hook #'mine/font-settings) ;; For client mode
 (mine/font-settings) ;; For GUI mode
 
-;; Set frame transparency
-;; (set-frame-parameter (selected-frame) 'alpha-background 100)
-;; (add-to-list 'default-frame-alist '(alpha-background 100))
-(set-frame-parameter (selected-frame) 'fullscreen 'maximized)
-(add-to-list 'default-frame-alist '(fullscreen . maximized))
-
 (column-number-mode)
 (global-display-line-numbers-mode t)
 (dolist (mode '(org-mode-hook
+		eshell-mode-hook
 		vterm-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
@@ -206,6 +201,22 @@
   ([remap describe-variable] . helpful-variable)
   ([remap describe-key] . helpful-key))
 
+(use-package perspective
+  :bind
+  ("C-x C-b" . persp-list-buffers)
+  :custom
+  (persp-state-default-file (expand-file-name "persp-state" user-emacs-directory))
+  (persp-mode-prefix-key (kbd "C-c M-p"))  ; pick your own prefix key here
+  :init
+  (persp-mode)
+  :config
+  (add-hook 'kill-emacs-hook #'persp-state-save)
+  (add-hook 'after-init-hook
+            (lambda () (persp-state-load persp-state-default-file)))
+  (with-eval-after-load 'consult
+    (consult-customize consult--source-buffer :hidden t :default nil)
+    (add-to-list 'consult-buffer-sources persp-consult-source)))
+
 (use-package eglot
   :hook
   (rust-mode . eglot-ensure)
@@ -233,15 +244,6 @@
 
 (use-package paredit
   :hook (scheme-mode . paredit-mode))
-
-(use-package tex
-  :ensure auctex
-  :custom
-  (TeX-auto-save t)
-  (TeX-parse-self t)
-  :config
-  (setq-default TeX-master nil)
-  )
 
 ;; (use-package flycheck
 ;;   :ensure t
@@ -315,7 +317,7 @@
       "* TODO %?")
      ("l" "Literature Note" plain (file "~/org/tmp.org")
       (file "100_Zotero/template.org"))
-     ("b" "TOREAD" entry (file "~/org/booklist.org")
+     ("b" "Toread" entry (file "~/org/booklist.org")
       "* TOREAD %?\n:PROPERTIES:\n:author:\n:rate:\n:END:")))
 
   (org-preview-latex-default-process 'dvisvgm)
@@ -362,25 +364,13 @@ mode to HTML.   Store the result in the clipboard."
                                (point-max)
                                "org2clip")))
 
-(use-package ledger-mode
-  :init
-  (setq ledger-clear-whole-transactions 1)
-  :config
-  (add-to-list 'evil-emacs-state-modes 'ledger-report-mode)
+(use-package tex
+  :ensure auctex
   :custom
-  (ledger-reports
-   '(("bal" "%(binary) --strict -f ~/org/PTA/keep.ledger bal")))
-  (ledger-accounts-file "~/org/PTA/accounts.ledger")
-  :mode "\\.ledger\\'")
-
-(use-package vterm
-  :commands vterm
-  :custom
-  (vterm-timer-delay nil)
-  (vterm-max-scrollback 10000)
-  (vterm-shell "/bin/fish")
+  (TeX-auto-save t)
+  (TeX-parse-self t)
   :config
-  (setq term-prompt-regexp "^❯ *") ;; This works not as intended
+  (setq-default TeX-master nil)
   )
 
 (use-package dired
@@ -441,21 +431,15 @@ mode to HTML.   Store the result in the clipboard."
   (popper-mode +1)
   (popper-echo-mode +1))
 
-(use-package perspective
-  :bind
-  ("C-x C-b" . persp-list-buffers)
+(use-package vterm
+  :commands vterm
   :custom
-  (persp-state-default-file (expand-file-name "persp-state" user-emacs-directory))
-  (persp-mode-prefix-key (kbd "C-c M-p"))  ; pick your own prefix key here
-  :init
-  (persp-mode)
+  (vterm-timer-delay nil)
+  (vterm-max-scrollback 10000)
+  (vterm-shell "/bin/fish")
   :config
-  (add-hook 'kill-emacs-hook #'persp-state-save)
-  (add-hook 'after-init-hook
-            (lambda () (persp-state-load persp-state-default-file)))
-  (with-eval-after-load 'consult
-    (consult-customize consult--source-buffer :hidden t :default nil)
-    (add-to-list 'consult-buffer-sources persp-consult-source)))
+  (setq term-prompt-regexp "^❯ *") ;; This works not as intended
+  )
 
 (use-package rime
   :bind
@@ -467,6 +451,17 @@ mode to HTML.   Store the result in the clipboard."
   (rime-posframe-style 'horizonal)
   (rime-posframe-properties (list :internal-border-width 10
                                 :font "Sarasa UI CL Medium")))
+
+(use-package ledger-mode
+  :init
+  (setq ledger-clear-whole-transactions 1)
+  :config
+  (add-to-list 'evil-emacs-state-modes 'ledger-report-mode)
+  :custom
+  (ledger-reports
+   '(("bal" "%(binary) --strict -f ~/org/PTA/keep.ledger bal")))
+  (ledger-accounts-file "~/org/PTA/accounts.ledger")
+  :mode "\\.ledger\\'")
 
 (defun mine/display-startup-time ()
   (message "Emacs loaded in %s with %d garbage collections."
