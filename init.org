@@ -191,7 +191,7 @@ Map =<escape>= to the same function as =<C-g>=. A good habit from vim.
 
 Use Evil mode to bring back beloved vim editing experience.
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
   (use-package evil
     :init
     (setq evil-want-integration t)
@@ -207,7 +207,7 @@ Use Evil mode to bring back beloved vim editing experience.
 
 Use evil collection for most mode compatibility.
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
   (use-package evil-collection
     :after evil
     :config
@@ -218,7 +218,7 @@ Use evil collection for most mode compatibility.
 
 Use general to get vim style leader key keybindings.
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
   (use-package general
     :config
     (general-evil-setup t)
@@ -262,7 +262,7 @@ Use general to get vim style leader key keybindings.
 
 Setup the QWERTY layout.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (defun meow-setup ()
   (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
   (meow-motion-define-key
@@ -349,7 +349,7 @@ Setup the QWERTY layout.
 
 Load Meow.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   (use-package meow
     :config
     (meow-setup)
@@ -976,12 +976,15 @@ Use emacs-rime for Chinese input.
 
 #+begin_src emacs-lisp
   (use-package rime
+    :bind
+    (:map rime-mode-map
+          ("C-`" . 'rime-send-keybinding))
     :custom
     (default-input-method "rime")
     (rime-show-candidate 'posframe)
     (rime-posframe-style 'horizonal)
     (rime-posframe-properties (list :internal-border-width 10
-  				  :font "Sarasa UI CL Medium")))
+                                  :font "Sarasa UI CL Medium")))
 #+end_src
 
 * Profiling

@@ -96,98 +96,58 @@
 
 (keymap-global-set "<escape>" 'keyboard-escape-quit)
 
-(defun meow-setup ()
-  (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
-  (meow-motion-define-key
-   '("j" . meow-next)
-   '("k" . meow-prev)
-   '("<escape>" . ignore))
-  (meow-leader-define-key
-   ;; Use SPC (0-9) for digit arguments.
-   '("1" . meow-digit-argument)
-   '("2" . meow-digit-argument)
-   '("3" . meow-digit-argument)
-   '("4" . meow-digit-argument)
-   '("5" . meow-digit-argument)
-   '("6" . meow-digit-argument)
-   '("7" . meow-digit-argument)
-   '("8" . meow-digit-argument)
-   '("9" . meow-digit-argument)
-   '("0" . meow-digit-argument)
-   '("/" . meow-keypad-describe-key)
-   '("?" . meow-cheatsheet))
-  (meow-normal-define-key
-   '("0" . meow-expand-0)
-   '("9" . meow-expand-9)
-   '("8" . meow-expand-8)
-   '("7" . meow-expand-7)
-   '("6" . meow-expand-6)
-   '("5" . meow-expand-5)
-   '("4" . meow-expand-4)
-   '("3" . meow-expand-3)
-   '("2" . meow-expand-2)
-   '("1" . meow-expand-1)
-   '("-" . negative-argument)
-   '(";" . meow-reverse)
-   '("," . meow-inner-of-thing)
-   '("." . meow-bounds-of-thing)
-   '("[" . meow-beginning-of-thing)
-   '("]" . meow-end-of-thing)
-   '("a" . meow-append)
-   '("A" . meow-open-below)
-   '("b" . meow-back-word)
-   '("B" . meow-back-symbol)
-   '("c" . meow-change)
-   '("d" . meow-delete)
-   '("D" . meow-backward-delete)
-   '("e" . meow-next-word)
-   '("E" . meow-next-symbol)
-   '("f" . meow-find)
-   '("g" . meow-cancel-selection)
-   '("G" . meow-grab)
-   '("h" . meow-left)
-   '("H" . meow-left-expand)
-   '("i" . meow-insert)
-   '("I" . meow-open-above)
-   '("j" . meow-next)
-   '("J" . meow-next-expand)
-   '("k" . meow-prev)
-   '("K" . meow-prev-expand)
-   '("l" . meow-right)
-   '("L" . meow-right-expand)
-   '("m" . meow-join)
-   '("n" . meow-search)
-   '("o" . meow-block)
-   '("O" . meow-to-block)
-   '("p" . meow-yank)
-   '("q" . meow-quit)
-   '("Q" . meow-goto-line)
-   '("r" . meow-replace)
-   '("R" . meow-swap-grab)
-   '("s" . meow-kill)
-   '("t" . meow-till)
-   '("u" . meow-undo)
-   '("U" . meow-undo-in-selection)
-   '("v" . meow-visit)
-   '("w" . meow-mark-word)
-   '("W" . meow-mark-symbol)
-   '("x" . meow-line)
-   '("X" . meow-goto-line)
-   '("y" . meow-save)
-   '("Y" . meow-sync-grab)
-   '("z" . meow-pop-selection)
-   '("'" . repeat)
-   '("<escape>" . ignore)))
-
-(use-package meow
+(use-package evil
+  :init
+  (setq evil-want-integration t)
+  (setq evil-want-keybinding nil)
+  (setq evil-want-C-u-scroll t)
+  (setq evil-want-C-i-jump nil)
   :config
-  (meow-setup)
-  (meow-global-mode 1)
-  (meow-leader-define-key
-   '("p" . "C-c M-p")
-   '("l" . "C-c C-o"))
+  (evil-mode)
   :custom
-  (meow-use-clipboard t))
+  (evil-respect-visual-line-mode 1)
+  (evil-undo-system 'undo-redo))
+
+(use-package evil-collection
+  :after evil
+  :config
+  (evil-collection-init))
+
+(use-package general
+  :config
+  (general-evil-setup t)
+  (general-create-definer mine/leader-keys
+    :keymaps '(normal insert visual emacs)
+    :prefix "SPC"
+    :global-prefix "C-SPC") ;; <C-SPC> is contradict to fcitx5 default settings, should turn off fcitx5 in most cases
+
+  (mine/leader-keys
+    "l" '(:ignore t :which-key "ledger-mode")
+    "lr" '(ledger-report
+	   :which-key "report")
+    
+    "o" '(:ignore t :which-key "org-mode")
+    "oa" '(org-agenda
+           :which-key "agenda")
+    "or" '(org-redisplay-inline-images
+           :which-key "redisplay inline images")
+    "ol" '(org-latex-preview
+           :which-key "preview LaTeX")
+    "oi" '((lambda () (interactive)
+             (find-file (concat org-directory "/index.org")))
+           :which-key "open index")
+    "oc" '(org-capture
+	   :which-key "capture")
+
+    "s" '(:ignore t :which-key "start")
+    "se" #'(mine/shell-create
+	    :which-key "start eshell")
+
+    "t" '(:ignore t :which-key "toggles")
+    "tt" '(consult-theme
+           :which-key "choose-theme")
+
+    "x" '(:keymap perspective-map :package perspective)))
 
 (use-package vertico
   :diminish
@@ -498,12 +458,15 @@ mode to HTML.   Store the result in the clipboard."
     (add-to-list 'consult-buffer-sources persp-consult-source)))
 
 (use-package rime
+  :bind
+  (:map rime-mode-map
+        ("C-`" . 'rime-send-keybinding))
   :custom
   (default-input-method "rime")
   (rime-show-candidate 'posframe)
   (rime-posframe-style 'horizonal)
   (rime-posframe-properties (list :internal-border-width 10
-				  :font "Sarasa UI CL Medium")))
+                                :font "Sarasa UI CL Medium")))
 
 (defun mine/display-startup-time ()
   (message "Emacs loaded in %s with %d garbage collections."
