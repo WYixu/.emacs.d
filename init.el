@@ -108,6 +108,9 @@
   :config
   (evil-collection-init))
 
+(add-hook 'org-mode-hook
+          (lambda () (setq evil-auto-indent nil)))
+
 (use-package general
   :config
   (general-evil-setup t)
@@ -141,6 +144,27 @@
     "t" '(:ignore t :which-key "toggles")
     "tt" '(consult-theme
            :which-key "choose-theme")
+
+    "n" '(:ignore t :which-key "org-roam")
+    "nf" '(org-roam-node-find :which-key "find a roam node")
+    "ni" '(org-roam-node-insert :which-key "insert a roam node")
+    "nl" '((lambda () (interactive)
+	      (org-roam-buffer-display-dedicated
+	       (org-roam-node-at-point)))
+	    :which-key "show backlinks")
+    "nd" '(:ignore t :which-key "dailies")
+    "ndn" '(org-roam-dailies-capture-today
+            :which-key "capture today")
+    "ndd" '(org-roam-dailies-goto-today
+            :which-key "goto today")
+    "ndT" '(org-roam-dailies-capture-tomorrow
+            :which-key "capture tomorrow")
+    "ndt" '(org-roam-dailies-goto-tomorrow
+            :which-key "goto tomorrow")
+    "ndY" '(org-roam-dailies-capture-yesterday
+            :which-key "capture yesterday")
+    "ndy" '(org-roam-dailies-goto-yesterday
+            :which-key "goto yesterday")
 
     "x" '(:keymap perspective-map :package perspective)))
 
@@ -364,6 +388,27 @@ mode to HTML.   Store the result in the clipboard."
                                (point-max)
                                "org2clip")))
 
+(use-package org-roam
+  :ensure t
+  :custom
+  (org-roam-directory (concat org-directory "/roam"))
+  (org-roam-completion-everywhere t)
+  (org-roam-capture-templates
+   '(("d" "default" plain "%?"
+      :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+      :unnarrowed t)
+     ("a" "anime" plain (file "~/org/roam/templates/anime.org")
+      :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+filetags: Anime\n#+season: %^{Season}\n#+rating: %^{Rating}\n")
+      :unnarrowed t)))
+  (org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+  :bind
+  (("C-M-i" . org-roam-node-insert))
+  :config
+  (org-roam-setup)
+  )
+
+(use-package org-roam-ui)
+
 (use-package tex
   :ensure auctex
   :custom
@@ -425,6 +470,7 @@ mode to HTML.   Store the result in the clipboard."
   (setq popper-reference-buffers
         '("\\*Messages\\*"
           "\\*Async Shell Command\\*"
+	  org-roam-mode
           helpful-mode
           eshell-mode
           compilation-mode))
