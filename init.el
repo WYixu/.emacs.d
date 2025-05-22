@@ -433,11 +433,10 @@ mode to HTML.   Store the result in the clipboard."
   :custom 
   (dired-kill-when-opening-new-dired-buffer t)
   (dired-listing-switches "-agho --group-directories-first")
-  )
-;;    :config
-;; (evil-collection-define-key 'normal 'dired-mode-map
-;;      ;;"h" 'dired-up-directory
-;; "l" 'dired-find-file))
+  :config
+  (evil-collection-define-key 'normal 'dired-mode-map
+    "h" 'dired-up-directory
+    "l" 'dired-find-file))
 
 (use-package nerd-icons-dired
   :hook (dired-mode . nerd-icons-dired-mode))

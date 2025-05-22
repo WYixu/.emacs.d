@@ -792,12 +792,10 @@ Dired is the default file management utility for emacs and it works well in most
     :custom 
     (dired-kill-when-opening-new-dired-buffer t)
     (dired-listing-switches "-agho --group-directories-first")
-    )
-  ;;    :config
-  ;; (evil-collection-define-key 'normal 'dired-mode-map
-  ;;      ;;"h" 'dired-up-directory
-  ;; "l" 'dired-find-file))
-
+    :config
+    (evil-collection-define-key 'normal 'dired-mode-map
+      "h" 'dired-up-directory
+      "l" 'dired-find-file))
 #+end_src
 
 *** Icons
