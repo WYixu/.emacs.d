@@ -2,7 +2,9 @@
 #+author: yxwang
 
 * Sway
-#+PROPERTY: header-args conf :tangle ./dotfiles/sway/config
+:PROPERTIES:
+:header-args: conf :tangle ./dotfiles/sway/config
+:END:
 
 This configuration is modified from official sway config.
 
@@ -351,3 +353,69 @@ This is a small trick to prevent GTK apps from frozen. Sources are not clear.
   include @sysconfdir@/sway/config.d/*
 #+end_src
 
+
+* MPV
+
+** Config
+:PROPERTIES:
+:header-args: conf :tangle ./dotfiles/mpv/mpv.conf
+:END:
+
+#+begin_src conf
+# config originally from the tutorial on vcb-s.com
+profile=high-quality
+
+deband=yes
+
+hwdec=auto
+gpu-api=vulkan
+target-colorspace-hint=yes
+
+cscale=catmull_rom
+deband=yes
+
+blend-subtitles=video
+
+# video-sync=display-resample
+# interpolation=yes
+tscale=oversample
+
+slang=zh,zh-hant
+sub-auto=fuzzy
+
+fullscreen=yes
+pause=yes
+keep-open=yes
+
+save-position-on-quit=yes
+
+cache=yes
+demuxer-max-bytes=1GiB
+
+sub-font='sans'
+sub-font-size=55
+sub-use-margins=yes
+sub-ass-force-margins=yes
+demuxer-mkv-subtitle-preroll=yes
+
+glsl-shaders="~~/shaders/Anime4K_Clamp_Highlights.glsl:~~/shaders/Anime4K_Restore_CNN_M.glsl:~~/shaders/Anime4K_Upscale_CNN_x2_M.glsl:~~/shaders/Anime4K_AutoDownscalePre_x2.glsl:~~/shaders/Anime4K_AutoDownscalePre_x4.glsl:~~/shaders/Anime4K_Upscale_CNN_x2_S.glsl"
+#+end_src
+
+** Input
+:PROPERTIES:
+:header-args: conf :tangle ./dotfiles/mpv/input.conf
+:END:
+
+Anime4K input settings.
+
+#+begin_src conf
+# Optimized shaders for lower-end GPU:
+CTRL+1 no-osd change-list glsl-shaders set "~~/shaders/Anime4K_Clamp_Highlights.glsl:~~/shaders/Anime4K_Restore_CNN_M.glsl:~~/shaders/Anime4K_Upscale_CNN_x2_M.glsl:~~/shaders/Anime4K_AutoDownscalePre_x2.glsl:~~/shaders/Anime4K_AutoDownscalePre_x4.glsl:~~/shaders/Anime4K_Upscale_CNN_x2_S.glsl"; show-text "Anime4K: Mode A (Fast)"
+CTRL+2 no-osd change-list glsl-shaders set "~~/shaders/Anime4K_Clamp_Highlights.glsl:~~/shaders/Anime4K_Restore_CNN_Soft_M.glsl:~~/shaders/Anime4K_Upscale_CNN_x2_M.glsl:~~/shaders/Anime4K_AutoDownscalePre_x2.glsl:~~/shaders/Anime4K_AutoDownscalePre_x4.glsl:~~/shaders/Anime4K_Upscale_CNN_x2_S.glsl"; show-text "Anime4K: Mode B (Fast)"
+CTRL+3 no-osd change-list glsl-shaders set "~~/shaders/Anime4K_Clamp_Highlights.glsl:~~/shaders/Anime4K_Upscale_Denoise_CNN_x2_M.glsl:~~/shaders/Anime4K_AutoDownscalePre_x2.glsl:~~/shaders/Anime4K_AutoDownscalePre_x4.glsl:~~/shaders/Anime4K_Upscale_CNN_x2_S.glsl"; show-text "Anime4K: Mode C (Fast)"
+CTRL+4 no-osd change-list glsl-shaders set "~~/shaders/Anime4K_Clamp_Highlights.glsl:~~/shaders/Anime4K_Restore_CNN_M.glsl:~~/shaders/Anime4K_Upscale_CNN_x2_M.glsl:~~/shaders/Anime4K_Restore_CNN_S.glsl:~~/shaders/Anime4K_AutoDownscalePre_x2.glsl:~~/shaders/Anime4K_AutoDownscalePre_x4.glsl:~~/shaders/Anime4K_Upscale_CNN_x2_S.glsl"; show-text "Anime4K: Mode A+A (Fast)"
+CTRL+5 no-osd change-list glsl-shaders set "~~/shaders/Anime4K_Clamp_Highlights.glsl:~~/shaders/Anime4K_Restore_CNN_Soft_M.glsl:~~/shaders/Anime4K_Upscale_CNN_x2_M.glsl:~~/shaders/Anime4K_AutoDownscalePre_x2.glsl:~~/shaders/Anime4K_AutoDownscalePre_x4.glsl:~~/shaders/Anime4K_Restore_CNN_Soft_S.glsl:~~/shaders/Anime4K_Upscale_CNN_x2_S.glsl"; show-text "Anime4K: Mode B+B (Fast)"
+CTRL+6 no-osd change-list glsl-shaders set "~~/shaders/Anime4K_Clamp_Highlights.glsl:~~/shaders/Anime4K_Upscale_Denoise_CNN_x2_M.glsl:~~/shaders/Anime4K_AutoDownscalePre_x2.glsl:~~/shaders/Anime4K_AutoDownscalePre_x4.glsl:~~/shaders/Anime4K_Restore_CNN_S.glsl:~~/shaders/Anime4K_Upscale_CNN_x2_S.glsl"; show-text "Anime4K: Mode C+A (Fast)"
+
+CTRL+0 no-osd change-list glsl-shaders clr ""; show-text "GLSL shaders cleared"
+#+end_src
