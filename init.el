@@ -388,11 +388,19 @@ mode to HTML.   Store the result in the clipboard."
                                (point-max)
                                "org2clip")))
 
+(defun mine/org-roam-preview-function ()
+    (let* ((elem (org-element-context))
+           (parent (org-element-property :parent elem)))
+      (string-trim-right (buffer-substring-no-properties
+                          (org-element-property :begin parent)
+                          (org-element-property :end parent)))))
+
 (use-package org-roam
   :ensure t
   :custom
   (org-roam-directory (concat org-directory "/roam"))
   (org-roam-completion-everywhere t)
+  (org-roam-preview-function #'mine/org-roam-preview-function)
   (org-roam-capture-templates
    '(("d" "default" plain "%?"
       :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
@@ -450,10 +458,6 @@ mode to HTML.   Store the result in the clipboard."
 (use-package visual-fill-column
   :defer t
   :hook ((org-mode LaTeX-mode) . mine/visual-fill-setup))
-
-(use-package edwina
-  :config
-  (edwina-mode 1))
 
 (customize-set-variable 'display-buffer-base-action
   '((display-buffer-reuse-window display-buffer-same-window)

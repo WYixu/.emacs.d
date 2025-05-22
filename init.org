@@ -725,12 +725,25 @@ mode to HTML.   Store the result in the clipboard."
 
 ** Org-roam
 
+Customised =org-roam-preview-funtion=, return current line.
+
 #+begin_src emacs-lisp
+  (defun mine/org-roam-preview-function ()
+      (let* ((elem (org-element-context))
+             (parent (org-element-property :parent elem)))
+        (string-trim-right (buffer-substring-no-properties
+                            (org-element-property :begin parent)
+                            (org-element-property :end parent)))))
+#+end_src
+
+#+begin_src emacs-lisp
+
   (use-package org-roam
     :ensure t
     :custom
     (org-roam-directory (concat org-directory "/roam"))
     (org-roam-completion-everywhere t)
+    (org-roam-preview-function #'mine/org-roam-preview-function)
     (org-roam-capture-templates
      '(("d" "default" plain "%?"
         :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
@@ -835,7 +848,7 @@ Visual-fill-column is used for display org-mode and latex-mode contents in the m
 
 Use [[https://github.com/ajgrf/edwina][edwina]] to manage splitting.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   (use-package edwina
     :config
     (edwina-mode 1))
@@ -843,7 +856,7 @@ Use [[https://github.com/ajgrf/edwina][edwina]] to manage splitting.
 
 Small trick to prevent buffers from poppling everywhere:
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
 (customize-set-variable 'display-buffer-base-action
   '((display-buffer-reuse-window display-buffer-same-window)
     (reusable-frames . t)))
