@@ -1,0 +1,6 @@
+This is my dotfiles for:
+- emacs
+- mpv
+- sway (not currently in use)
+
+Try GNU Stow to easily manage these dotfiles.
