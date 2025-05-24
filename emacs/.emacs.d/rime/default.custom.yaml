@@ -3,5 +3,7 @@ patch:
         - schema: double_pinyin
         - schema: japanese
 #       - schema: luna_pinyin
-#	- schema: cangjie5
+#       - schema: cangjie5
         - schema: zhengma
+    menu:
+        page_size: 7

@@ -3,7 +3,7 @@
 
 * Sway
 :PROPERTIES:
-:header-args: conf :tangle ./dotfiles/sway/config
+:header-args: conf :tangle ./sway/.config/sway/config
 :END:
 
 This configuration is modified from official sway config.
@@ -353,12 +353,11 @@ This is a small trick to prevent GTK apps from frozen. Sources are not clear.
   include @sysconfdir@/sway/config.d/*
 #+end_src
 
-
 * MPV
 
 ** Config
 :PROPERTIES:
-:header-args: conf :tangle ./dotfiles/mpv/mpv.conf
+:header-args: conf :tangle ./mpv/.config/mpv/mpv.conf
 :END:
 
 #+begin_src conf
@@ -403,7 +402,7 @@ glsl-shaders="~~/shaders/Anime4K_Clamp_Highlights.glsl:~~/shaders/Anime4K_Restor
 
 ** Input
 :PROPERTIES:
-:header-args: conf :tangle ./dotfiles/mpv/input.conf
+:header-args: conf :tangle ./mpv/.config/mpv/input.conf
 :END:
 
 Anime4K input settings.
